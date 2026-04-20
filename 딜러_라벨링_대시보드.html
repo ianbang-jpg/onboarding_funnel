@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>딜러 라벨링 대시보드 — 신규 가입자 추천 퍼널</title>
+<style>
+  :root{
+    --bg:#0b0d12; --panel:#141823; --panel2:#1b2030; --border:#252b3d;
+    --text:#e8ecf4; --muted:#9aa3b8; --accent:#6ee7ff; --accent2:#a78bfa;
+    --ok:#34d399; --warn:#fbbf24; --pink:#fb7185; --blue:#60a5fa;
+    --shadow: 0 10px 30px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+    font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    -webkit-font-smoothing:antialiased}
+  a{color:var(--accent);text-decoration:none}
+  .wrap{max-width:1440px;margin:0 auto;padding:28px 24px 80px}
+  header.hero{
+    display:flex;flex-direction:column;gap:10px;
+    padding:28px 28px;border-radius:18px;
+    background:radial-gradient(1200px 300px at 10% -20%, rgba(110,231,255,.12), transparent 60%),
+              radial-gradient(900px 300px at 100% 0%, rgba(167,139,250,.12), transparent 60%),
+              linear-gradient(180deg,#121724,#0f1320);
+    border:1px solid var(--border);box-shadow:var(--shadow);margin-bottom:22px}
+  .hero h1{margin:0;font-size:26px;letter-spacing:-.02em}
+  .hero p{margin:0;color:var(--muted);font-size:14px;line-height:1.65}
+  .hero .meta{display:flex;gap:18px;flex-wrap:wrap;margin-top:10px}
+  .hero .meta span{font-size:12px;color:var(--muted);background:rgba(255,255,255,.04);
+    padding:6px 10px;border-radius:999px;border:1px solid var(--border)}
+
+  .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+  .kpi{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:16px 18px}
+  .kpi .label{font-size:12px;color:var(--muted)}
+  .kpi .value{font-size:22px;font-weight:700;margin-top:6px;letter-spacing:-.01em}
+  .kpi .sub{font-size:11px;color:var(--muted);margin-top:4px}
+
+  .filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;align-items:center}
+  .filter-bar .title{font-size:12px;color:var(--muted);margin-right:6px}
+  .chip{font-size:12px;padding:7px 12px;border-radius:999px;border:1px solid var(--border);
+    background:var(--panel);color:var(--text);cursor:pointer;transition:all .15s}
+  .chip:hover{border-color:#3a4260}
+  .chip.active{background:linear-gradient(90deg,rgba(110,231,255,.2),rgba(167,139,250,.2));
+    border-color:#4d5b87;color:#fff}
+  .chip .dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:6px;vertical-align:middle;background:var(--muted)}
+  .chip[data-dim="cat"] .dot{background:#6ee7ff}
+  .chip[data-dim="price"] .dot{background:#fbbf24}
+  .chip[data-dim="style"] .dot{background:#a78bfa}
+  .chip[data-dim="scale"] .dot{background:#34d399}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:18px}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:16px;
+    overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow)}
+  .card-top{padding:18px 20px;border-bottom:1px solid var(--border);
+    background:linear-gradient(180deg,rgba(255,255,255,.02),transparent)}
+  .card-top .row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .card-top h2{margin:0;font-size:20px;letter-spacing:-.01em}
+  .card-top .persona{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5}
+  .badge-rank{font-size:10px;padding:3px 8px;border-radius:999px;background:rgba(110,231,255,.12);
+    color:#8de9ff;border:1px solid rgba(110,231,255,.2);white-space:nowrap}
+  .badge-rank.gold{background:rgba(251,191,36,.12);color:#fcd34d;border-color:rgba(251,191,36,.2)}
+  .badge-rank.purple{background:rgba(167,139,250,.12);color:#c4b5fd;border-color:rgba(167,139,250,.2)}
+  .badge-rank.green{background:rgba(52,211,153,.12);color:#6ee7b7;border-color:rgba(52,211,153,.2)}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);padding:14px 20px;gap:10px;
+    border-bottom:1px solid var(--border)}
+  .stat{display:flex;flex-direction:column;gap:2px}
+  .stat .k{font-size:10px;color:var(--muted);letter-spacing:.02em}
+  .stat .v{font-size:14px;font-weight:600}
+  .stat .u{font-size:10px;color:var(--muted)}
+
+  .section{padding:14px 20px;border-bottom:1px solid var(--border)}
+  .section:last-child{border-bottom:0}
+  .section h3{margin:0 0 10px;font-size:11px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}
+  .tags{display:flex;flex-wrap:wrap;gap:6px}
+  .tag{font-size:11px;padding:5px 9px;border-radius:6px;border:1px solid var(--border);
+    background:rgba(255,255,255,.03);color:var(--text)}
+  .tag.cat{border-color:rgba(110,231,255,.25);background:rgba(110,231,255,.06);color:#aef1ff}
+  .tag.price{border-color:rgba(251,191,36,.25);background:rgba(251,191,36,.06);color:#ffe0a8}
+  .tag.style{border-color:rgba(167,139,250,.25);background:rgba(167,139,250,.06);color:#d5c6ff}
+  .tag.scale{border-color:rgba(52,211,153,.25);background:rgba(52,211,153,.06);color:#a7f3d0}
+  .tag.persona{border-color:rgba(251,113,133,.28);background:rgba(251,113,133,.08);color:#ffc6ce}
+
+  .price-dist{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin-top:6px}
+  .bar{position:relative;height:34px;background:rgba(255,255,255,.04);border-radius:4px;overflow:hidden;
+    border:1px solid var(--border)}
+  .bar .fill{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(180deg,#fbbf24,#f59e0b)}
+  .bar .lbl{position:absolute;bottom:2px;left:0;right:0;text-align:center;font-size:9px;color:#fff;opacity:.9}
+  .bar .sub{position:absolute;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--muted)}
+
+  .timeline{display:grid;grid-template-columns:repeat(24,1fr);gap:2px;margin-top:4px}
+  .hr{height:22px;background:rgba(255,255,255,.03);border-radius:2px;position:relative}
+  .hr .f{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(180deg,#a78bfa,#6ee7ff);border-radius:2px}
+  .hr-labels{display:grid;grid-template-columns:repeat(24,1fr);gap:2px;margin-top:4px;font-size:9px;color:var(--muted);text-align:center}
+
+  .methods{display:flex;gap:4px;margin-top:6px;height:14px;border-radius:8px;overflow:hidden;border:1px solid var(--border)}
+  .methods .m{height:100%}
+  .methods .m.buy{background:#60a5fa}
+  .methods .m.auction{background:#a78bfa}
+  .methods .m.free{background:#34d399}
+  .methods-legend{display:flex;gap:14px;margin-top:6px;font-size:11px;color:var(--muted)}
+  .methods-legend span i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:middle}
+
+  .ip-rank{display:flex;flex-direction:column;gap:4px;margin-top:4px}
+  .ip-row{display:flex;align-items:center;gap:8px;font-size:12px}
+  .ip-row .name{width:90px;color:var(--text)}
+  .ip-row .track{flex:1;height:6px;background:rgba(255,255,255,.05);border-radius:3px;overflow:hidden}
+  .ip-row .track .f{height:100%;background:linear-gradient(90deg,#6ee7ff,#a78bfa)}
+  .ip-row .n{width:34px;text-align:right;color:var(--muted);font-size:11px}
+
+  .legend-footer{margin-top:30px;padding:18px;background:var(--panel);border:1px solid var(--border);border-radius:14px}
+  .legend-footer h3{margin:0 0 8px;font-size:14px}
+  .legend-footer p{color:var(--muted);font-size:12px;line-height:1.7;margin:6px 0}
+  .dim-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:12px}
+  .dim-grid .box{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+  .dim-grid h4{margin:0 0 8px;font-size:13px}
+  .dim-grid ul{margin:0;padding-left:18px;color:var(--muted);font-size:12px;line-height:1.7}
+  .hide{display:none !important}
+  @media (max-width: 880px){
+    .kpi-row{grid-template-columns:repeat(2,1fr)}
+    .grid{grid-template-columns:1fr}
+    .dim-grid{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <h1>딜러 라벨링 대시보드 · 신규 가입자 추천 퍼널</h1>
+    <p>8명 딜러의 최근 라이브 <b>1,400건</b> + 판매 내역 <b>6,400건</b>을 기반으로 카테고리 · 가격대 · 운영 스타일 · 판매 규모 네 가지 차원에서 세분화 라벨링한 결과입니다. 상단 칩을 눌러 필터링 가능.</p>
+    <div class="meta">
+      <span>분석 기준일: 2026-04-19</span>
+      <span>데이터 소스: _최근라이브.xlsx + _판매내역.xlsx</span>
+      <span>라벨 차원: 4</span>
+      <span>세부 태그: 70+</span>
+    </div>
+  </header>
+
+  <div class="kpi-row">
+    <div class="kpi"><div class="label">총 딜러</div><div class="value">8명</div><div class="sub">글로벌루나, 네미, 문방구아저씨, 박뚜비, 백수니, 월향, 이크에크, 자유의에렌</div></div>
+    <div class="kpi"><div class="label">합산 라이브 매출 (최근 라이브)</div><div class="value">₩7.25억</div><div class="sub">회당 평균 ₩51.4만</div></div>
+    <div class="kpi"><div class="label">평균 라이브 길이</div><div class="value">108분</div><div class="sub">최소 64분(백수니) ~ 최대 204분(문방구아저씨)</div></div>
+    <div class="kpi"><div class="label">주요 방송 시간대</div><div class="value">21~24시</div><div class="sub">전체 라이브의 69%가 밤~심야에 집중</div></div>
+  </div>
+
+  <div class="filter-bar" id="filter">
+    <span class="title">필터:</span>
+    <button class="chip active" data-filter="all">전체</button>
+    <button class="chip" data-dim="cat" data-filter="애니-남성향"><span class="dot"></span>애니 남성향</button>
+    <button class="chip" data-dim="cat" data-filter="디지몬"><span class="dot"></span>디지몬 특화</button>
+    <button class="chip" data-dim="cat" data-filter="드래곤볼"><span class="dot"></span>드래곤볼</button>
+    <button class="chip" data-dim="cat" data-filter="원피스"><span class="dot"></span>원피스</button>
+    <button class="chip" data-dim="cat" data-filter="히로아카"><span class="dot"></span>히로아카</button>
+    <button class="chip" data-dim="cat" data-filter="캐릭터"><span class="dot"></span>짱구·산리오·디즈니</button>
+    <button class="chip" data-dim="price" data-filter="초저가"><span class="dot"></span>초저가 (<5천)</button>
+    <button class="chip" data-dim="price" data-filter="저가"><span class="dot"></span>저가 (~2만)</button>
+    <button class="chip" data-dim="price" data-filter="중저가"><span class="dot"></span>중저가 (2~5만)</button>
+    <button class="chip" data-dim="price" data-filter="프리미엄"><span class="dot"></span>프리미엄 혼합</button>
+    <button class="chip" data-dim="style" data-filter="심야"><span class="dot"></span>심야 (22시~2시)</button>
+    <button class="chip" data-dim="style" data-filter="저녁"><span class="dot"></span>초저녁 (18~21시)</button>
+    <button class="chip" data-dim="style" data-filter="경매전문"><span class="dot"></span>경매 전문</button>
+    <button class="chip" data-dim="style" data-filter="즉시구매"><span class="dot"></span>즉시구매 특화</button>
+    <button class="chip" data-dim="style" data-filter="나눔이벤트"><span class="dot"></span>무료나눔 활발</button>
+    <button class="chip" data-dim="style" data-filter="고빈도"><span class="dot"></span>고빈도 라이브</button>
+    <button class="chip" data-dim="style" data-filter="장시간"><span class="dot"></span>장시간형(3h+)</button>
+    <button class="chip" data-dim="scale" data-filter="대형"><span class="dot"></span>대형 매출</button>
+    <button class="chip" data-dim="scale" data-filter="중형"><span class="dot"></span>중형 매출</button>
+    <button class="chip" data-dim="scale" data-filter="성장"><span class="dot"></span>성장중</button>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <section class="legend-footer">
+    <h3>라벨 차원 정의 · 신규 가입자 추천 퍼널에 어떻게 쓰이는가</h3>
+    <p>온보딩에서 수집한 신규 유저의 <b>관심 IP · 예산 · 활동 시간대 · 구매 방식 선호</b>를 각 딜러의 라벨 집합과 코사인 유사도 또는 가중 매칭으로 연결합니다. 아래 네 차원 라벨은 모두 상호 조합 가능하도록 직교적(independent)으로 설계되었습니다.</p>
+    <div class="dim-grid">
+      <div class="box"><h4>① 카테고리 / 상품군</h4>
+        <ul>
+          <li>주력 IP 태그 (Top 3) — 제목·카테고리 태그 빈도 기반</li>
+          <li>장르 버킷: 소년만화 / 여성향 / 캐릭터 / 디즈니 / 혼합</li>
+          <li>상품 포맷: 쿠지 / 피규어 / 아크릴·캔뱃지 / 랜박·랜덤박스</li>
+        </ul>
+      </div>
+      <div class="box"><h4>② 가격대 / 객단가</h4>
+        <ul>
+          <li>평균·중앙값 객단가 구간 (초저가/저가/중저가/중가/프리미엄)</li>
+          <li>가격 스윙도: 단일가 안정형 · 스윙형 · 프리미엄 혼합</li>
+          <li>주력 가격 버킷(bar 분포에서 1위 구간)</li>
+        </ul>
+      </div>
+      <div class="box"><h4>③ 라이브 운영 스타일</h4>
+        <ul>
+          <li>시간대 프로필 (딥나이트 / 밤 / 저녁 / 이른저녁)</li>
+          <li>평균 라이브 길이 (짧은형 / 표준 / 장시간)</li>
+          <li>방송 빈도 (일 평균 건수 기반: 고빈도 / 중간 / 저빈도)</li>
+          <li>판매 방식 분포 (즉시구매 / 경매 / 무료나눔 비중)</li>
+        </ul>
+      </div>
+      <div class="box"><h4>④ 판매 규모 / 성과</h4>
+        <ul>
+          <li>총매출 티어 (대형 / 중대형 / 중형 / 소형)</li>
+          <li>회당 매출 (프리미엄 / 중상위 / 중간 / 소형)</li>
+          <li>회당 판매 건수(인게이지먼트) · 활동성 지표</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+// ---------- Dealer dataset (summarized from actual files) ----------
+const dealers = [
+  {
+    name: "글로벌루나",
+    persona: "심야 디지몬·진격 쿠지 대량 즉시구매 머신. 회당 매출 압도적 1위.",
+    filters: ["애니-남성향","디지몬","심야","저가","즉시구매","대형"],
+    stats: { 매출: "₩2.89억", 회당: "₩144.6만", 라이브: "200", 평균가: "₩1.7만" },
+    ip: [["디지몬",130],["진격의 거인",114],["귀멸의 칼날",75],["히로아카",35],["체인소 맨",20]],
+    price: {"≤1만":0,"1-3만":780,"3-5만":9,"5-10만":10,"10-30만":1,"30만+":0},
+    hours: {23:66,22:56,21:33,20:6,0:5,1:3,19:3,18:7},
+    methods: { 즉시:99.8, 경매:0.2, 나눔:0 },
+    labels: {
+      cat: ["애니 남성향","디지몬 특화","진격의거인","귀멸의칼날","쿠지 상품","랜박 전문"],
+      price: ["저가 1~3만원 집중","단일가 안정형(₩1.5만 축)","주력 버킷: 1~3만(98%)"],
+      style: ["딥나이트(22~24시)","표준 라이브(90분)","중빈도(0.65/일)","즉시구매 특화(99.8%)","쿠지·신상 드랍 방식"],
+      scale: ["매출 티어: 대형 🥇","회당 매출 프리미엄(₩145만)","회당 평균 판매건수 60+","인기도 최상위"],
+    },
+    rec: ["디지몬·진격 팬","심야 쇼핑러","쿠지 뽑기 좋아하는 유저","예산 ₩2만 내 즉시구매 선호"]
+  },
+  {
+    name: "네미",
+    persona: "다양한 소년만화 IP를 경매·즉시 혼합으로 운영하는 밸런스형.",
+    filters: ["애니-남성향","드래곤볼","중저가","저가","즉시구매","성장","중형"],
+    stats: { 매출: "₩9,736만", 회당: "₩48.7만", 라이브: "200", 평균가: "₩2.1만" },
+    ip: [["드래곤볼",37],["진격의 거인",19],["나루토",16],["기타",12],["주술회전",10]],
+    price: {"≤1만":220,"1-3만":452,"3-5만":26,"5-10만":79,"10-30만":3,"30만+":1},
+    hours: {20:32,23:21,21:19,15:19,19:13,22:10,18:9,0:8,14:6,16:5},
+    methods: { 즉시:63.7, 경매:33.9, 나눔:2.4 },
+    labels: {
+      cat: ["애니 남성향","드래곤볼","진격·나루토","주술회전","봇치·데스노트","용자 모집형"],
+      price: ["중저가 (평균 ₩2.1만)","스윙형(저가+프리미엄 ₩50만 건 존재)","주력 버킷: 1~3만(56%)"],
+      style: ["저녁~밤(20~23시)","표준 라이브(97분)","중빈도(0.41/일)","혼합형(즉시 64% + 경매 34%)","'자리·용자' 모집 형식"],
+      scale: ["매출 티어: 중대형","회당 매출 중상위(₩48만)","활동성 안정적"],
+    },
+    rec: ["드래곤볼·진격 팬","여러 IP 두루 보고 싶은 유저","경매·즉시 둘 다 시도해보고 싶은 유저"]
+  },
+  {
+    name: "문방구아저씨",
+    persona: "피규어·이치방쿠지 장시간 경매와 무료나눔이 특징인 프리미엄 종합관.",
+    filters: ["애니-남성향","드래곤볼","원피스","캐릭터","중저가","프리미엄","경매전문","저녁","장시간","나눔이벤트","중형"],
+    stats: { 매출: "₩8,365만", 회당: "₩43.8만", 라이브: "191", 평균가: "₩3.5만" },
+    ip: [["드래곤볼",35],["원피스",28],["산리오",19],["히로아카",13],["디즈니",11],["귀멸의 칼날",9]],
+    price: {"≤1만":141,"1-3만":125,"3-5만":165,"5-10만":136,"10-30만":8,"30만+":1},
+    hours: {20:33,21:33,22:17,16:15,19:15,17:10,18:9,14:8,23:7,15:7,13:5},
+    methods: { 즉시:32.4, 경매:39.6, 나눔:28 },
+    labels: {
+      cat: ["이치방쿠지 전문","피규어·아트토이","원피스·드래곤볼","산리오·디즈니 캐릭터","헌정경매"],
+      price: ["중가 (평균 ₩3.5만, 중앙 ₩4.0만)","프리미엄 혼합(~₩33만)","주력 버킷: 3~5만(21%)·5~10만(17%) 분산"],
+      style: ["초저녁~밤(20~22시)","장시간형(평균 204분 · 3시간 40분)","저빈도(0.36/일)","경매+즉시 균형+무료나눔 28%","'실패하지 않는다' 시리즈"],
+      scale: ["매출 티어: 중대형","회당 매출 중상위(₩44만)","객단가 최상위권"],
+    },
+    rec: ["이치방쿠지 컬렉터","프리미엄 피규어 지갑 여는 유저","무료나눔 이벤트 혜택 찾는 유저","장시간 몰입 라이브 선호"]
+  },
+  {
+    name: "박뚜비",
+    persona: "심야·새벽에 짱구·나루토·귀칼을 랜덤박스로 다루는 고빈도 캐릭터 딜러.",
+    filters: ["캐릭터","애니-남성향","저가","심야","즉시구매","나눔이벤트","고빈도","중형"],
+    stats: { 매출: "₩9,412만", 회당: "₩47.1만", 라이브: "200", 평균가: "₩1.5만" },
+    ip: [["짱구",80],["나루토",71],["히로아카",54],["기타",52],["디즈니",46],["귀멸의 칼날",35]],
+    price: {"≤1만":348,"1-3만":245,"3-5만":50,"5-10만":45,"10-30만":1,"30만+":0},
+    hours: {0:48,22:38,23:26,21:24,1:21,20:15,2:9,3:6,19:5,4:4,18:3},
+    methods: { 즉시:69, 경매:17.1, 나눔:13.9 },
+    labels: {
+      cat: ["짱구 특화","나루토·귀칼","히로아카","디즈니","나히아·웨하스","랜덤박스 중심"],
+      price: ["저가 (평균 ₩1.5만, 중앙 ₩1.0만)","주력 버킷: ≤1만(44%)·1~3만(31%)","가성비 입문형"],
+      style: ["딥나이트(22~02시)","표준-장시간(140분)","고빈도(1.04/일)","즉시 70% + 경매 17% + 나눔 14%","'추첨방송·모집' 잦음"],
+      scale: ["매출 티어: 중대형","회당 매출 중상위(₩47만)","활동 시간대 폭 넓음"],
+    },
+    rec: ["짱구·나루토 가벼운 팬","예산 ₩1만 이하 가성비 유저","올빼미형 심야 쇼핑러","무료나눔·이벤트 좋아하는 유저"]
+  },
+  {
+    name: "백수니",
+    persona: "짧게 열고 빠르게 닫는 저녁 경매 전문, 아직 태그·카테고리 정리 필요한 성장 셀러.",
+    filters: ["저녁","경매전문","중저가","성장"],
+    stats: { 매출: "₩2,986만", 회당: "₩35.6만", 라이브: "84", 평균가: "₩3.4만" },
+    ip: [["디지몬",3],["원피스",2],["드래곤볼",1],["나루토",1]],
+    price: {"≤1만":94,"1-3만":286,"3-5만":275,"5-10만":113,"10-30만":1,"30만+":1},
+    hours: {17:11,19:11,16:10,0:10,18:10,21:9,20:8,23:6,15:4,14:3,22:3,1:2,2:2},
+    methods: { 즉시:42.9, 경매:53.2, 나눔:3.8 },
+    labels: {
+      cat: ["헌터·건담","디지몬·제복·미쿠","카테고리 태깅 취약(온보딩 보정 필요)"],
+      price: ["중저가 (평균 ₩3.4만, 중앙 ₩3.2만)","단단한 3~5만대","주력 버킷: 1~3만(36%)·3~5만(34%)"],
+      style: ["초저녁~저녁(16~19시) · 0시대 새벽 혼재","짧은형(64분)","저빈도(0.17/일)","경매 우세(53%) + 즉시 43%"],
+      scale: ["매출 티어: 소형(성장 단계)","회당 매출 중간(₩36만)","라이브 수 절대적으로 적음"],
+    },
+    rec: ["경매 입문 유저","저녁 이른 시간대 시청자","짧게 보고 끝내고 싶은 유저","중저가 건담·헌터 수집러"]
+  },
+  {
+    name: "월향",
+    persona: "심야 애니 피규어 경매 전문관. 23시 단일 슬롯에 경매를 몰아 처리.",
+    filters: ["애니-남성향","원피스","히로아카","중저가","경매전문","심야"],
+    stats: { 매출: "₩4,287만", 회당: "₩21.4만", 라이브: "200", 평균가: "₩3.1만" },
+    ip: [["히로아카",74],["원피스",67],["드래곤볼",48],["리제로",44],["스파이패밀리",42],["오등분의 신부",17]],
+    price: {"≤1만":114,"1-3만":395,"3-5만":145,"5-10만":92,"10-30만":16,"30만+":0},
+    hours: {23:113,21:16,22:15,18:12,0:12,20:9,19:8,17:6,1:4,2:3},
+    methods: { 즉시:4.6, 경매:90.5, 나눔:4.8 },
+    labels: {
+      cat: ["애니 피규어","히로아카·원피스","드래곤볼","리제로·스파패","여성향 IP 포함(오등분)"],
+      price: ["중저가 (평균 ₩3.1만, 중앙 ₩2.3만)","스윙형(일부 ~₩22만 프리미엄 포함)","주력 버킷: 1~3만(49%)"],
+      style: ["딥나이트 집중(23시 단일 피크 113건)","표준(86분)","중빈도(0.80/일)","경매 전문(91%)","'각종 피규어 이것저것' 브랜드"],
+      scale: ["매출 티어: 중형","회당 매출 중간(₩21만)","경매 회전률 높음"],
+    },
+    rec: ["23시에 접속하는 심야 유저","경매 입찰 선호","애니 피규어 수집가","여러 IP를 한 방송에서 보고 싶은 유저"]
+  },
+  {
+    name: "이크에크",
+    persona: "딥나이트에 하루 평균 1.4회 열며 '자리·용자' 모집으로 빠르게 도는 고빈도 즉시구매.",
+    filters: ["저가","심야","즉시구매","고빈도","중형"],
+    stats: { 매출: "₩3,452만", 회당: "₩17.3만", 라이브: "200", 평균가: "₩2.2만" },
+    ip: [["드래곤볼",1],["나루토",1],["귀멸의 칼날",1],["피규어(키워드)",16],["봇치·데스노트",27]],
+    price: {"≤1만":125,"1-3만":528,"3-5만":35,"5-10만":109,"10-30만":1,"30만+":0},
+    hours: {0:32,22:24,23:23,1:18,21:16,20:11,2:10,19:7,18:6,3:5,17:4,4:4,16:3},
+    methods: { 즉시:81.3, 경매:18.5, 나눔:0.2 },
+    labels: {
+      cat: ["자리·용자 모집","드볼·나히아·봇치","피규어 혼합","태깅 취약"],
+      price: ["저중가 (평균 ₩2.2만, 중앙 ₩1.7만)","주력 버킷: 1~3만(66%)","가성비 회전형"],
+      style: ["딥나이트(22~02시)","표준(76분)","최고빈도(1.40/일) 🥇","즉시구매 특화(81%)","'짧방·일뜯·택배' 키워드"],
+      scale: ["매출 티어: 중형","회당 매출 소형(₩17만)","방송 수로 누적하는 유형"],
+    },
+    rec: ["가볍게 자주 들르는 고관여 유저","₩2만 내외 가성비 소비자","새벽에도 돌아가는 라이브 선호"]
+  },
+  {
+    name: "자유의에렌",
+    persona: "초저가 굿즈·캔뱃지·아크릴을 저녁 경매+무료나눔으로 소진하는 굿즈 특화.",
+    filters: ["애니-남성향","히로아카","초저가","저녁","경매전문","나눔이벤트","중형"],
+    stats: { 매출: "₩5,322만", 회당: "₩43.3만", 라이브: "123", 평균가: "₩3,900" },
+    ip: [["히로아카",25],["귀멸의 칼날",19],["진격의 거인",6],["원피스",6],["주술회전",6],["체인소 맨",5]],
+    price: {"≤1만":674,"1-3만":46,"3-5만":2,"5-10만":0,"10-30만":0,"30만+":0},
+    hours: {19:35,20:28,22:18,21:18,18:10,23:6,17:3,16:2,15:2,0:1},
+    methods: { 즉시:2.6, 경매:87.6, 나눔:9.8 },
+    labels: {
+      cat: ["굿즈 전문","캔뱃지·아크릴","미소녀 가챠·미니피규어","히로아카·귀칼 중심","랜깡·랜박"],
+      price: ["초저가 (평균 ₩3.9천, 중앙 ₩2.5천)","₩1만 이하 84%","프리미엄 없음"],
+      style: ["저녁(18~22시)","표준(76분)","중빈도(0.47/일)","경매 전문(88%)+무료나눔 10%","'초치기·하위상' 스피드 경매"],
+      scale: ["매출 티어: 중대형","회당 매출 중상위(₩43만) — 박리다매 효율 상위","회당 판매건수 매우 높음"],
+    },
+    rec: ["굿즈·캔뱃지 가볍게 모으는 유저","₩5천 이하 초저가 예산","경매·랜깡 이벤트 좋아하는 유저","무료나눔 참여 선호"]
+  }
+];
+
+// ---------- Rendering ----------
+const grid = document.getElementById('grid');
+const rankTiers = {
+  "대형 🥇": "gold", "대형": "gold",
+  "중대형": "purple", "중형": "purple",
+  "소형(성장 단계)": "green", "소형": "green"
+};
+
+function priceBar(dist){
+  const max = Math.max(...Object.values(dist));
+  return `<div class="price-dist">${Object.entries(dist).map(([k,v])=>{
+    const h = max? Math.max(6, Math.round((v/max)*100)):6;
+    return `<div class="bar" title="${k}: ${v}건"><div class="fill" style="height:${h}%"></div><div class="sub">${v}</div><div class="lbl">${k}</div></div>`;
+  }).join('')}</div>`;
+}
+function hourBar(hours){
+  const filled = {}; for(let i=0;i<24;i++) filled[i]=hours[i]||0;
+  const max = Math.max(...Object.values(filled));
+  let bars='';let labels='';
+  for(let i=0;i<24;i++){
+    const v = filled[i];
+    const h = max? Math.max(4, Math.round((v/max)*100)):4;
+    bars += `<div class="hr" title="${i}시: ${v}회"><div class="f" style="height:${h}%"></div></div>`;
+    labels += `<div>${i%3===0?i:''}</div>`;
+  }
+  return `<div class="timeline">${bars}</div><div class="hr-labels">${labels}</div>`;
+}
+function methodBar(m){
+  return `<div class="methods">
+    <div class="m buy" style="flex:${m.즉시}"></div>
+    <div class="m auction" style="flex:${m.경매}"></div>
+    <div class="m free" style="flex:${m.나눔}"></div>
+  </div>
+  <div class="methods-legend">
+    <span><i style="background:#60a5fa"></i>즉시구매 ${m.즉시.toFixed(1)}%</span>
+    <span><i style="background:#a78bfa"></i>경매 ${m.경매.toFixed(1)}%</span>
+    <span><i style="background:#34d399"></i>무료나눔 ${m.나눔.toFixed(1)}%</span>
+  </div>`;
+}
+function ipBars(ip){
+  const max = Math.max(...ip.map(x=>x[1]));
+  return `<div class="ip-rank">${ip.slice(0,5).map(([n,v])=>{
+    const w = Math.round((v/max)*100);
+    return `<div class="ip-row"><div class="name">${n}</div><div class="track"><div class="f" style="width:${w}%"></div></div><div class="n">${v}</div></div>`;
+  }).join('')}</div>`;
+}
+function tagList(arr, cls){
+  return `<div class="tags">${arr.map(t=>`<span class="tag ${cls}">${t}</span>`).join('')}</div>`;
+}
+function rankBadge(scale){
+  const tier = scale[0];
+  let cls='';
+  if(tier.includes('대형')) cls='gold';
+  else if(tier.includes('중대형')||tier.includes('중형')) cls='purple';
+  else if(tier.includes('소형')) cls='green';
+  return `<span class="badge-rank ${cls}">${tier.replace('매출 티어: ','')}</span>`;
+}
+function render(filter='all'){
+  grid.innerHTML = dealers.map(d=>{
+    const visible = filter==='all' || d.filters.includes(filter);
+    return `<article class="card ${visible?'':'hide'}" data-filters="${d.filters.join('|')}">
+      <div class="card-top">
+        <div class="row">
+          <div>
+            <h2>${d.name}</h2>
+            <div class="persona">${d.persona}</div>
+          </div>
+          ${rankBadge(d.labels.scale)}
+        </div>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="k">라이브 수</div><div class="v">${d.stats.라이브}<span class="u"> 회</span></div></div>
+        <div class="stat"><div class="k">총 매출</div><div class="v">${d.stats.매출}</div></div>
+        <div class="stat"><div class="k">회당 매출</div><div class="v">${d.stats.회당}</div></div>
+        <div class="stat"><div class="k">평균 객단가</div><div class="v">${d.stats.평균가}</div></div>
+      </div>
+      <div class="section">
+        <h3>① 카테고리 / 상품군</h3>
+        ${tagList(d.labels.cat,'cat')}
+        <div style="margin-top:12px">${ipBars(d.ip)}</div>
+      </div>
+      <div class="section">
+        <h3>② 가격대 / 객단가</h3>
+        ${tagList(d.labels.price,'price')}
+        ${priceBar(d.price)}
+      </div>
+      <div class="section">
+        <h3>③ 라이브 운영 스타일</h3>
+        ${tagList(d.labels.style,'style')}
+        <div style="margin-top:10px">${hourBar(d.hours)}</div>
+        <div style="margin-top:12px">${methodBar(d.methods)}</div>
+      </div>
+      <div class="section">
+        <h3>④ 판매 규모 / 성과</h3>
+        ${tagList(d.labels.scale,'scale')}
+      </div>
+      <div class="section">
+        <h3>🎯 추천 타겟 (신규 가입자 매칭)</h3>
+        ${tagList(d.rec,'persona')}
+      </div>
+    </article>`;
+  }).join('');
+}
+render('all');
+
+// Filter
+document.getElementById('filter').addEventListener('click', (e)=>{
+  if(!e.target.classList.contains('chip')) return;
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  e.target.classList.add('active');
+  const f = e.target.dataset.filter;
+  render(f);
+});
+</script>
+</body>
+</html>
