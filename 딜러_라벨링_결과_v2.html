@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>피규어 딜러 라벨링 결과 v2.1 · 온보딩 퍼널</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand: #CC785C;
+    --brand-dark: #A15A42;
+    --ink: #191919;
+    --gray: #6B6B6B;
+    --gray-2: #9a9a9a;
+    --soft: #F0EEE6;
+    --soft-2: #FAF9F5;
+    --border: #E5E3DC;
+    --male: #3B6AA6;
+    --female: #B55C90;
+    --neutral: #6F7C8C;
+    --kids: #7fa87f;
+    --warn: #C49A3F;
+    --weak: #bdbdbd;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    color: var(--ink);
+    background: var(--soft-2);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 48px 32px 100px;
+  }
+  .brand-bar {
+    height: 4px;
+    background: var(--brand);
+    width: 100%;
+    position: fixed;
+    top: 0; left: 0;
+    z-index: 100;
+  }
+  header.doc-head {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 20px;
+    margin-bottom: 32px;
+  }
+  h1 {
+    font-size: 30px;
+    font-weight: 900;
+    margin: 0 0 6px;
+    letter-spacing: -0.02em;
+  }
+  .subtitle {
+    font-size: 13px;
+    color: var(--gray);
+    font-weight: 400;
+  }
+  .intro {
+    font-size: 14px;
+    color: #333;
+    line-height: 1.7;
+    margin: 20px 0 14px;
+    max-width: 760px;
+  }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin: 20px 0 0;
+  }
+  .stat {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+  }
+  .stat .n {
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--brand);
+    line-height: 1;
+  }
+  .stat .l {
+    font-size: 11px;
+    color: var(--gray);
+    margin-top: 4px;
+    letter-spacing: 0.02em;
+  }
+
+  /* Filter bar */
+  .filter-bar {
+    position: sticky;
+    top: 4px;
+    background: rgba(250,249,245,0.96);
+    backdrop-filter: saturate(1.5) blur(4px);
+    padding: 14px 0 12px;
+    margin: 20px 0 18px;
+    border-bottom: 1px solid var(--border);
+    z-index: 20;
+  }
+  .filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    align-items: center;
+  }
+  .filter-row .label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gray);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-right: 4px;
+  }
+  .chip {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #444;
+    cursor: pointer;
+    transition: all 0.1s;
+    user-select: none;
+  }
+  .chip:hover { background: var(--soft); }
+  .chip.active {
+    background: var(--brand);
+    color: #fff;
+    border-color: var(--brand);
+  }
+  .chip .count {
+    margin-left: 4px;
+    font-size: 10.5px;
+    opacity: 0.75;
+    font-weight: 400;
+  }
+  #search {
+    flex: 1;
+    min-width: 140px;
+    padding: 6px 12px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    font-size: 12.5px;
+    font-family: inherit;
+    background: #fff;
+  }
+
+  h2.section {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--brand);
+    margin: 40px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--brand);
+  }
+
+  .dealer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));
+    gap: 16px;
+  }
+  .dealer {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    display: flex;
+    flex-direction: column;
+  }
+  .dealer.weak {
+    opacity: 0.72;
+    border-style: dashed;
+  }
+  .dealer-head {
+    background: var(--soft);
+    padding: 14px 18px 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .dealer-name {
+    font-weight: 700;
+    font-size: 17px;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .dealer-meta {
+    font-size: 11px;
+    color: var(--gray-2);
+    white-space: nowrap;
+  }
+  .dealer-body {
+    padding: 14px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    flex: 1;
+  }
+
+  .block {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .block-head {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--gray);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* Label pills */
+  .labels {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .label-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 14px;
+    font-size: 12px;
+    font-weight: 600;
+    background: #fff;
+    border: 1px solid var(--border);
+    line-height: 1.4;
+  }
+  .label-pill.pri {
+    background: #fff;
+    border: 1px solid var(--brand);
+    color: var(--brand-dark);
+  }
+  .label-pill.sec {
+    background: var(--soft);
+    color: #555;
+    font-weight: 500;
+  }
+  .label-pill .share {
+    font-size: 10.5px;
+    color: var(--gray);
+    font-weight: 500;
+  }
+  .label-pill .tag {
+    display: inline-block;
+    font-size: 9.5px;
+    font-weight: 700;
+    color: #fff;
+    padding: 1px 5px;
+    border-radius: 8px;
+    letter-spacing: 0.02em;
+  }
+  .tag.male { background: var(--male); }
+  .tag.female { background: var(--female); }
+  .tag.mixed { background: var(--neutral); }
+  .tag.kids { background: var(--kids); }
+
+  /* Target badge on dealer */
+  .target-badge {
+    font-size: 10.5px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.02em;
+  }
+
+  /* Time zone chart */
+  .zones-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+  }
+  .zone-pill {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    padding: 3px 9px;
+    border-radius: 14px;
+    background: var(--soft);
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #333;
+  }
+  .zone-pill .hr {
+    font-size: 9.5px;
+    color: var(--gray);
+    font-weight: 400;
+  }
+  .zone-pill .share {
+    font-size: 10.5px;
+    color: var(--brand-dark);
+    font-weight: 700;
+  }
+  .zone-pill.primary { background: #FFE9DE; color: var(--brand-dark); }
+
+  .hour-bars {
+    display: grid;
+    grid-template-columns: repeat(24, 1fr);
+    gap: 1px;
+    margin-top: 4px;
+    height: 34px;
+    align-items: end;
+  }
+  .hour-bar {
+    background: #E8DED0;
+    border-radius: 1px 1px 0 0;
+    position: relative;
+    min-height: 2px;
+  }
+  .hour-bar.max { background: var(--brand); }
+  .hour-bar.mid { background: #E9AC8E; }
+  .hour-bar[title] { cursor: help; }
+  .hour-axis {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    margin-top: 3px;
+    font-size: 9.5px;
+    color: var(--gray-2);
+  }
+
+  /* Product format badges */
+  .pd-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .pd-pill {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: 12px;
+    background: #fff;
+    border: 1px solid var(--border);
+    font-size: 11.5px;
+    font-weight: 600;
+  }
+  .pd-pill .share {
+    font-size: 10px;
+    color: var(--gray);
+    font-weight: 500;
+  }
+  .pd-pill.k { color: #8B5E34; border-color: #E8D3C5; }
+  .pd-pill.g { color: #3B6AA6; border-color: #C8D3E2; }
+  .pd-pill.r { color: #7A4A8E; border-color: #D8C5E2; }
+
+  /* Evidence keywords */
+  .evidence {
+    font-size: 11px;
+    color: var(--gray);
+    line-height: 1.6;
+  }
+  .kw-chip {
+    display: inline-block;
+    font-family: 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 10.5px;
+    padding: 1px 6px;
+    margin: 0 3px 2px 0;
+    background: #F7F5EE;
+    border-radius: 8px;
+    color: #4a4a4a;
+  }
+  .kw-chip b { color: var(--brand-dark); font-weight: 700; }
+
+  .empty-msg {
+    font-size: 12.5px;
+    color: var(--warn);
+    background: #FFF7E6;
+    border: 1px dashed #F0D9A0;
+    border-radius: 8px;
+    padding: 8px 12px;
+  }
+
+  /* Automation mapping table */
+  .auto-table {
+    margin-top: 14px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 18px;
+    font-size: 12px;
+    overflow-x: auto;
+  }
+  .auto-table table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11.5px;
+  }
+  .auto-table th, .auto-table td {
+    text-align: left;
+    padding: 5px 8px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .auto-table th {
+    font-size: 10px;
+    color: var(--gray);
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    background: var(--soft);
+  }
+  .auto-table td.dealer-col { font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .auto-table td.en {
+    font-family: 'SF Mono', Menlo, Consolas, monospace;
+    color: var(--brand-dark);
+    font-weight: 500;
+    font-size: 10.5px;
+  }
+  .auto-table td .ten {
+    display: inline-block;
+    margin-right: 4px;
+  }
+
+  .notes {
+    margin-top: 36px;
+    background: #FFF8F4;
+    border: 1px solid #F0D9CC;
+    border-radius: 12px;
+    padding: 18px 22px;
+    font-size: 13px;
+    line-height: 1.8;
+    color: #444;
+  }
+  .notes h3 {
+    margin: 0 0 8px;
+    font-size: 13px;
+    color: var(--brand-dark);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  .notes ul { margin: 6px 0 0; padding-left: 18px; }
+  .notes li { margin-bottom: 4px; }
+
+  footer.doc-foot {
+    margin-top: 40px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--gray-2);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  @media (max-width: 720px) {
+    .page { padding: 24px 16px 60px; }
+    h1 { font-size: 22px; }
+    .dealer-grid { grid-template-columns: 1fr; }
+    .dealer-name { font-size: 15.5px; }
+  }
+</style>
+</head>
+<body>
+<div class="brand-bar"></div>
+<div class="page">
+
+<header class="doc-head">
+  <h1>피규어 딜러 라벨링 결과 v2.1</h1>
+  <div class="subtitle">와이스 신규 설치 유저 대상 · 딜러 자동 추천 온보딩 퍼널 · 2026-04-21 (라벨링 사전 v3.5)</div>
+
+  <p class="intro">
+    31명 딜러의 <b>판매내역 전수</b>(평균 1,800+건)와 <b>최근 라이브 200건</b>의 상품명 · 방송명 · 카테고리 태그를 라벨링 사전 v3.5 키워드로 전수 스캔해서
+    각 딜러의 IP 라벨(주/부), 상품 포맷 분포, 활동 시간대를 도출했습니다.
+    판매 시점(UTC)과 라이브 시작 시간을 KST로 변환해 5개 구간(새벽/오전/오후/저녁/심야)으로 집계했고,
+    라벨링 근거가 부족한 딜러는 "라벨링 제한"으로 표시했습니다.
+    v2.1에서 기타 애니 하위 구분(남성향/여성향)을 폐기해 단일 라벨로 통합했습니다.
+  </p>
+
+  <div class="stats">
+    <div class="stat"><div class="n" id="s-dealers">—</div><div class="l">전체 딜러</div></div>
+    <div class="stat"><div class="n" id="s-labelable">—</div><div class="l">라벨링 완료</div></div>
+    <div class="stat"><div class="n" id="s-products">—</div><div class="l">분석 상품건</div></div>
+    <div class="stat"><div class="n" id="s-lives">—</div><div class="l">분석 라이브</div></div>
+    <div class="stat"><div class="n" id="s-primary">—</div><div class="l">총 주라벨</div></div>
+  </div>
+</header>
+
+<!-- Filter -->
+<div class="filter-bar">
+  <div class="filter-row" style="margin-bottom:8px;">
+    <span class="label">IP 필터</span>
+    <div id="ip-chips" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+  </div>
+  <div class="filter-row" style="margin-bottom:8px;">
+    <span class="label">타겟</span>
+    <div id="target-chips" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+  </div>
+  <div class="filter-row" style="margin-bottom:8px;">
+    <span class="label">시간대</span>
+    <div id="zone-chips" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+  </div>
+  <div class="filter-row">
+    <span class="label">포맷</span>
+    <div id="pd-chips" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+    <input id="search" placeholder="딜러명/키워드 검색…" />
+  </div>
+</div>
+
+<h2 class="section">딜러별 라벨링 결과 <span style="font-weight:400; font-size:13px; color:var(--gray);"> · 주라벨 점유율 기준 정렬</span></h2>
+<div class="dealer-grid" id="dealer-grid"></div>
+
+<h2 class="section">자동화용 매핑 테이블</h2>
+<div class="auto-table">
+  <table id="auto-tbl">
+    <thead>
+      <tr>
+        <th>딜러</th>
+        <th>주 라벨 (kebab-case)</th>
+        <th>부 라벨</th>
+        <th>타겟</th>
+        <th>시간대</th>
+        <th>상품 포맷</th>
+      </tr>
+    </thead>
+    <tbody id="auto-tbody"></tbody>
+  </table>
+</div>
+
+<div class="notes">
+  <h3>방법론 및 운영 참고</h3>
+  <ul>
+    <li><b>키워드 가중치</b> — 상품명 매칭 1점, 라이브 제목/카테고리 태그 2점. 라이브는 진행 시간 동안 노출량이 크므로 가중치 부여.</li>
+    <li><b>라벨 판정 기준</b> — 주라벨: 해당 IP 누적 히트 ≥ 60건 그리고 전체 IP 히트 중 8% 이상. 부라벨: 히트 ≥ 30건, 4% 이상. 상위 3개까지.</li>
+    <li><b>조합 매칭 규칙</b> — 거인(+진격), 신룡(+드볼/오공), 파워(+체인소/레제), DC(+배트/조커/마블), ABC(+A상/B상/쿠지) 등 단독 오탐 위험 키워드는 앵커 동시 출현을 요구.</li>
+    <li><b>활동 시간대</b> — 판매확정 타임스탬프(UTC)와 라이브 시작시각(KST)을 모두 KST로 변환해 집계. 새벽 0-6 · 오전 6-12 · 오후 12-18 · 저녁 18-22 · 심야 22-24.</li>
+    <li><b>라벨링 제한</b> — 판매내역·라이브 텍스트에서 IP 키워드 히트가 60건 미만인 딜러(예: 버츄얼토이)는 상품명이 범용적이어서 별도 검토가 필요합니다.</li>
+    <li><b>추천 로직 연동</b> — 주라벨은 on-off 매칭, 부라벨은 2차 스코어로 사용 권장. 시간대는 "지금 라이브 중" 필터/푸시 타이밍에 활용.</li>
+  </ul>
+</div>
+
+<footer class="doc-foot">
+  <span>딜러 라벨링 결과 v2.1 · 와이스 온보딩 퍼널</span>
+  <span>2026-04-21 · 31명 딜러 · 라벨링 사전 v3.5</span>
+</footer>
+
+</div>
+
+<script id="label-data" type="application/json">{"Doya": {"np": 836, "nl": 28, "th": 433, "tg": "남녀공용", "ok": true, "pri": [{"n": "원나블", "e": "shonen-classic", "s": null, "p": "원나블", "t": "남녀공용", "h": 216, "r": 49.9, "kw": {"나루토": 113, "원피스": 67, "아카츠키": 2}}, {"n": "귀주톱", "e": "shonen-modern", "s": null, "p": "귀주톱", "t": "남녀공용", "h": 107, "r": 24.7, "kw": {"주술": 88, "귀칼": 4, "주술회전": 3, "귀멸": 2}}], "sec": [{"n": "기타 애니", "e": "other-anime", "s": null, "p": "기타 애니", "t": "남녀공용", "h": 45, "r": 10.4, "kw": {"도라에몽": 26, "에반게리온": 5, "최애": 4, "죠죠": 4}}], "pd": [{"n": "쿠지", "e": "kuji", "h": 351, "r": 99.4, "kw": {"제복": 127, "용자": 95, "야생": 73, "라원": 30, "통용자": 6}}], "zs": [{"z": "심야", "r": 40.4}, {"z": "저녁", "r": 27.8}], "hr": [[0, 97], [1, 82], [2, 49], [3, 0], [4, 0], [5, 0], [6, 0], [7, 0], [8, 0], [9, 0], [10, 0], [11, 0], [12, 0], [13, 0], [14, 0], [15, 0], [16, 10], [17, 37], [18, 69], [19, 70], [20, 27], [21, 74], [22, 172], [23, 177]], "zc": {"새벽": 228, "오전": 0, "오후": 47, "저녁": 240, "심야": 349}}, "KUROKUMA": {"np": 1984, "nl": 195, "th": 702, "tg": "남녀공용", "ok": true, "pri": [{"n": "원나블", "e": "shonen-classic", "s": null, "p": "원나블", "t": "남녀공용", "h": 461, "r": 65.7, "kw": {"원피스": 229, "나루토": 112, "로우": 65, "나미": 1}}, {"n": "드래곤볼", "e": "dragon-ball", "s": null, "p": "드래곤볼", "t": "남성향", "h": 94, "r": 13.4, "kw": {"드볼": 76, "오공": 1}}, {"n": "귀주톱", "e": "shonen-modern", "s": null, "p": "귀주톱", "t": "남녀공용", "h": 62, "r": 8.8, "kw": {"귀멸": 26, "체인소": 4, "귀칼": 2}}], "sec": [{"n": "기타 애니", "e": "other-anime", "s": null, "p": "기타 애니", "t": "남녀공용", "h": 31, "r": 4.4, "kw": {"하이큐": 23, "죠죠": 1, "베르세르크": 1, "에반게리온": 1}}], "pd": [{"n": "쿠지", "e": "kuji", "h": 1239, "r": 92.7, "kw": {"일뜯": 436, "라원": 369, "용자": 249, "야생": 73, "통용자": 29}}], "zs": [{"z": "심야", "r": 41.3}, {"z": "저녁", "r": 25.4}], "hr": [[0, 202], [1, 133], [2, 39], [3, 36], [4, 19], [5, 1], [6, 0], [7, 1], [8, 1], [9, 0], [10, 3], [11, 25], [12, 56], [13, 21], [14, 51], [15, 68], [16, 37], [17, 32], [18, 111], [19, 90], [20, 100], [21, 253], [22, 453], [23, 447]], "zc": {"새벽": 430, "오전": 30, "오후": 265, "저녁": 554, "심야": 900}}, "구마": {"np": 1946, "nl": 135, "th": 820, "tg": "남녀공용", "ok": true, "pri": [{"n": "원나블", "e": "shonen-classic", "s": null, "p": "원나블", "t": "남녀공용", "h": 472, "r": 57.6, "kw": {"나루토": 316, "원피스": 105, "블리치": 2}}, {"n": "포켓몬", "e": "pokemon", "s": null, "p": "포켓몬", "t": "전연령", "h": 99, "r": 12.1, "kw": {"포켓몬": 92, "포켓몬스터": 2}}, {"n": "산리오 · 치이카와", "e": "sanrio-chiikawa", "s": null, "p": "산리오 · 치이카와", "t": "여성향", "h": 97, "r": 11.8, "kw": {"산리오": 93}}], "sec": [{"n": "귀주톱", "e": "shonen-modern", "s": null, "p": "귀주톱", "t": "남녀공용", "h": 54, "r": 6.6, "kw": {"주술": 20, "주술회전": 19, "귀멸": 2}}, {"n": "기타 애니", "e": "other-anime", "s": null, "p": "기타 애니", "t": "남녀공용", "h": 48, "r": 5.9, "kw": {"봇치": 13, "디지몬": 12, "베르세르크": 12, "강연금": 7, "헌터X헌터": 1}}, {"n": "히로아카", "e": "my-hero-academia", "s": null, "p": "히로아카", "t": "남녀공용", "h": 40, "r": 4.9, "kw": {"나히아": 38}}], "pd": [{"n": "가챠 · 랜덤", "e": "gacha-random", "h": 499, "r": 45.3, "kw": {"랜박": 487, "가챠": 2}}, {"n": "쿠지", "e": "kuji", "h": 482, "r": 43.7, "kw": {"용자": 225, "제복": 107, "야생": 60, "통용자": 15, "장당": 14}}, {"n": "굿즈", "e": "goods", "h": 121, "r": 11.0, "kw": {"포스터": 95, "인형": 24}}], "zs": [{"z": "오후", "r": 49.8}, {"z": "저녁", "r": 48.4}], "hr": [[0, 0], [1, 0], [2, 0], [3, 0], [4, 0], [5, 0], [6, 0], [7, 0], [8, 1], [9, 0], [10, 0], [11, 16], [12, 13], [13, 26], [14, 57], [15, 190], [16, 357], [17, 393], [18, 240], [19, 335], [20, 346], [21, 87], [22, 19], [23, 1]], "zc": {"새벽": 0, "오전": 17, "오후": 1036, "저녁": 1008, "심야": 20}}, "글로벌루나": {"np": 2000, "nl": 200, "th": 2022, "tg": "남녀공용", "ok": true, "pri": [{"n": "기타 애니", "e": "other-anime", "s": null, "p": "기타 애니", "t": "남녀공용", "h": 661, "r": 32.7, "kw": {"디지몬": 150, "코난": 127, "체리": 108, "도라에몽": 52, "은혼": 32}}, {"n": "진격의 거인", "e": "attack-on-titan", "s": null, "p": "진격의 거인", "t": "남녀공용", "h": 460, "r": 22.7, "kw": {"진격의": 114, "거인": 114, "조사병단": 2}}, {"n": "귀주톱", "e": "shonen-modern", "s": null, "p": "귀주톱", "t": "남녀공용", "h": 437, "r": 21.6, "kw": {"귀칼": 128, "주술": 111, "귀멸": 75, "체인소": 20, "기유": 1}}], "sec": [{"n": "원나블", "e": "shonen-classic", "s": null, "p": "원나블", "t": "남녀공용", "h": 109, "r": 5.4, "kw": {"원피스": 66, "나루토": 23, "로우": 1, "블리치": 1, "오로성": 1}}], "pd": [{"n": "쿠지", "e": "kuji", "h": 519, "r": 89.6, "kw": {"용자": 224, "야생": 190, "일뜯": 27, "라원": 8, "통용자": 7}}, {"n": "가챠 · 랜덤", "e": "gacha-random", "h": 56, "r": 9.7, "kw": {"랜박": 16, "뽑기": 6, "가챠": 5, "랜깡": 1}}], "zs": [{"z": "심야", "r": 59.5}, {"z": "새벽", "r": 22.9}], "hr": [[0, 283], [1, 130], [2, 70], [3, 21], [4, 0], [5, 0], [6, 0], [7, 0], [8, 1], [9, 0], [10, 0], [11, 0], [12, 2], [13, 1], [14, 8], [15, 16], [16, 0], [17, 4], [18, 26], [19, 42], [20, 18], [21, 268], [22, 484], [23, 826]], "zc": {"새벽": 504, "오전": 1, "오후": 31, "저녁": 354, "심야": 1310}}, "내아내이쁨": {"np": 2000, "nl": 81, "th": 2398, "tg": "남녀공용", "ok": true, "pri": [{"n": "귀주톱", "e": "shonen-modern", "s": null, "p": "귀주톱", "t": "남녀공용", "h": 1220, "r": 50.9, "kw": {"주술": 557, "귀칼": 211, "체인소": 111, "주술회전": 73, "귀멸": 35}}, {"n": "원나블", "e": "shonen-classic", "s": null, "p": "원나블", "t": "남녀공용", "h": 489, "r": 20.4, "kw": {"원피스": 276, "나루토": 104, "키드": 10, "아카츠키": 2, "블리치": 1}}, {"n": "짱구", "e": "crayon-shinchan", "s": null, "p": "짱구", "t": "전연령", "h": 200, "r": 8.3, "kw": {"짱구": 162}}], "sec": [{"n": "히로아카", "e": "my-hero-academia", "s": null, "p": "히로아카", "t": "남녀공용", "h": 154, "r": 6.4, "kw": {"나히아": 142}}, {"n": "기타 애니", "e": "other-anime", "s": null, "p": "기타 애니", "t": "남녀공용", "h": 117, "r": 4.9, "kw": {"디지몬": 37, "최애": 35, "코난": 31, "하이큐": 2, "유희왕": 2}}], "pd": [{"n": "쿠지", "e": "kuji", "h": 721, "r": 66.9, "kw": {"야생": 253, "용자": 224, "라원": 59, "일뜯": 59, "ABC": 32}}, {"n": "굿즈", "e": "goods", "h": 328, "r": 30.4, "kw": {"아크릴": 148, "뱃지": 62, "인형": 46, "캔뱃지": 45, "엽서": 10}}], "zs": [{"z": "새벽", "r": 82.2}], "hr": [[0, 247], [1, 456], [2, 404], [3, 264], [4, 221], [5, 118], [6, 99], [7, 45], [8, 10], [9, 15], [10, 4], [11, 0], [12, 3], [13, 3], [14, 9], [15, 1], [16, 10], [17, 2], [18, 0], [19, 1], [20, 10], [21, 27], [22, 50], [23, 82]], "zc": {"새벽": 1710, "오전": 173, "오후": 28, "저녁": 38, "심야": 132}}, "내일의식빵": {"np": 1956, "nl": 200, "th": 328, "tg": "남녀공용", "ok": true, "pri": [{"n": "기타 애니", "e": "other-anime", "s": null, "p": "기타 애니", "t": "남녀공용", "h": 85, "r": 25.9, "kw": {"디지몬": 30, "은혼": 28, "프리큐어": 14, "봇치": 2, "데스노트": 1}}, {"n": "진격의 거인", "e": "attack-on-titan", "s": null, "p": "진격의 거인", "t": "남녀공용", "h": 62, "r": 18.9, "kw": {"리바이": 30, "진격거": 28, "초대형": 1}}], "sec": [{"n": "드래곤볼", "e": "dragon-ball", "s": null, "p": "드래곤볼", "t": "남성향", "h": 49, "r": 14.9, "kw": {"드볼": 38, "크리링": 3}}, {"n": "산리오 · 치이카와", "e": "sanrio-chiikawa", "s": null, "p": "산리오 · 치이카와", "t": "여성향", "h": 44, "r": 13.4, "kw": {"산리오": 22, "키티": 16, "마이멜로디": 1}}], "pd": [{"n": "쿠지", "e": "kuji", "h": 1315, "r": 91.8, "kw": {"하위상": 787, "제복": 211, "라원": 83, "용자": 61, "일뜯": 53}}], "zs": [{"z": "오후", "r": 30.9}, {"z": "새벽", "r": 26.6}], "hr": [[0, 247], [1, 200], [2, 81], [3, 37], [4, 8], [5, 1], [6, 0], [7, 0], [8, 0], [9, 0], [10, 1], [11, 33], [12, 21], [13, 34], [14, 79], [15, 151], [16, 200], [17, 181], [18, 171], [19, 97], [20, 72], [21, 85], [22, 166], [23, 291]], "zc": {"새벽": 574, "오전": 34, "오후": 666, "저녁": 425, "심야": 457}}, "네미": {"np": 1994, "nl": 200, "th": 1008, "tg": "남녀공용", "ok": true, "pri": [{"n": "드래곤볼", "e": "dragon-ball", "s": null, "p": "드래곤볼", "t": "남성향", "h": 257, "r": 25.5, "kw": {"드볼": 231}}, {"n": "원나블", "e": "shonen-classic", "s": null, "p": "원나블", "t": "남녀공용", "h": 215, "r": 21.3, "kw": {"나루토": 113, "이치고": 20, "사스케": 12, "아카츠키": 10, "원피스": 9}}, {"n": "귀주톱", "e": "shonen-modern", "s": null, "p": "귀주톱", "t": "남녀공용", "h": 196, "r": 19.4, "kw": {"주술": 66, "귀칼": 35, "첸소": 22, "귀멸": 12, "주술회전": 11}}], "sec": [], "pd": [{"n": "쿠지", "e": "kuji", "h": 578, "r": 84.0, "kw": {"용자": 275, "야생": 143, "통용자": 38, "라원": 37, "일뜯": 5}}, {"n": "가챠 · 랜덤", "e": "gacha-random", "h": 100, "r": 14.5, "kw": {"가챠": 88, "랜박": 7}}], "zs": [{"z": "오후", "r": 41.7}, {"z": "저녁", "r": 30.7}], "hr": [[0, 99], [1, 54], [2, 37], [3, 16], [4, 1], [5, 0], [6, 0], [7, 0], [8, 0], [9, 2], [10, 5], [11, 2], [12, 9], [13, 48], [14, 147], [15, 246], [16, 263], [17, 201], [18, 29], [19, 94], [20, 139], [21, 412], [22, 272], [23, 118]], "zc": {"새벽": 207, "오전": 9, "오후": 914, "저녁": 674, "심야": 390}}, "다이호": {"np": 2000, "nl": 200, "th": 776, "tg": "남녀공용", "ok": true, "pri": [{"n": "기타 애니", "e": "other-anime", "s": null, "p": "기타 애니", "t": "남녀공용", "h": 342, "r": 44.1, "kw": {"체리": 141, "전생슬": 46, "유유백서": 37, "죠죠": 22, "디지몬": 19}}, {"n": "원나블", "e": "shonen-classic", "s": null, "p": "원나블", "t": "남녀공용", "h": 138, "r": 17.8, "kw": {"원피스": 70, "나루토": 36, "아카츠키": 3, "블리치": 2, "오로성": 2}}, {"n": "산리오 · 치이카와", "e": "sanrio-chiikawa", "s": null, "p": "산리오 · 치이카와", "t": "여성향", "h": 108, "r": 13.9, "kw": {"교동": 41, "한교동": 39, "산리오": 8, "키티": 6, "치이카와": 1}}], "sec": [{"n": "귀주톱", "e": "shonen-modern", "s": null, "p": "귀주톱", "t": "남녀공용", "h": 45, "r": 5.8, "kw": {"주술": 27, "귀칼": 4, "사멸회유": 1, "주술회전": 1, "귀멸": 1}}], "pd": [{"n": "쿠지", "e": "kuji", "h": 1275, "r": 99.1, "kw": {"야생": 642, "용자": 438, "라원": 50, "라스트원": 15, "일뜯": 12}}], "zs": [{"z": "새벽", "r": 38.7}, {"z": "심야", "r": 34.3}], "hr": [[0, 392], [1, 321], [2, 91], [3, 44], [4, 4], [5, 0], [6, 0], [7, 0], [8, 0], [9, 0], [10, 0], [11, 0], [12, 2], [13, 1], [14, 0], [15, 66], [16, 28], [17, 27], [18, 32], [19, 126], [20, 167], [21, 145], [22, 302], [23, 452]], "zc": {"새벽": 852, "오전": 0, "오후": 124, "저녁": 470, "심야": 754}}, "당가": {"np": 1998, "nl": 200, "th": 724, "tg": "남녀공용", "ok": true, "pri": [{"n": "귀주톱", "e": "shonen-modern", "s": null, "p": "귀주톱", "t": "남녀공용", "h": 215, "r": 29.7, "kw": {"주술": 52, "주술회전": 29, "귀칼": 21, "귀멸": 11, "사멸회유": 7}}, {"n": "진격의 거인", "e": "attack-on-titan", "s": null, "p": "진격의 거인", "t": "남녀공용", "h": 128, "r": 17.7, "kw": {"진격거": 41, "거인": 18, "진격의": 16, "초대형": 3}}, {"n": "원나블", "e": "shonen-classic", "s": null, "p": "원나블", "t": "남녀공용", "h": 124, "r": 17.1, "kw": {"원피스": 41, "나루토": 34}}], "sec": [{"n": "짱구", "e": "crayon-shinchan", "s": null, "p": "짱구", "t": "전연령", "h": 58, "r": 8.0, "kw": {"짱구": 41}}], "pd": [{"n": "쿠지", "e": "kuji", "h": 2442, "r": 100.0, "kw": {"제복": 962, "야생": 568, "용자": 278, "통용자": 135, "일뜯": 97}}], "zs": [{"z": "저녁", "r": 38.4}, {"z": "심야", "r": 29.3}], "hr": [[0, 279], [1, 101], [2, 112], [3, 51], [4, 2], [5, 0], [6, 0], [7, 0], [8, 0], [9, 3], [10, 11], [11, 59], [12, 12], [13, 2], [14, 5], [15, 27], [16, 25], [17, 21], [18, 70], [19, 201], [20, 242], [21, 330], [22, 322], [23, 323]], "zc": {"새벽": 545, "오전": 73, "오후": 92, "저녁": 843, "심야": 645}}, "레제랑마키마": {"np": 500, "nl": 39, "th": 431, "tg": "남녀공용", "ok": true, "pri": [{"n": "귀주톱", "e": "shonen-modern", "s": null, "p": "귀주톱", "t": "남녀공용", "h": 334, "r": 77.5, "kw": {"주술": 86, "체인소": 65, "귀칼": 33, "주술회전": 33, "첸소": 3}}, {"n": "히로아카", "e": "my-hero-academia", "s": null, "p": "히로아카", "t": "남녀공용", "h": 89, "r": 20.6, "kw": {"나히아": 69, "엔데버": 1}}], "sec": [], "pd": [{"n": "쿠지", "e": "kuji", "h": 559, "r": 97.7, "kw": {"야생": 277, "용자": 122, "라원": 115}}], "zs": [{"z": "새벽", "r": 49.9}, {"z": "오후", "r": 29.3}], "hr": [[0, 66], [1, 65], [2, 46], [3, 37], [4, 41], [5, 14], [6, 6], [7, 6], [8, 0], [9, 0], [10, 0], [11, 0], [12, 41], [13, 100], [14, 5], [15, 0], [16, 0], [17, 12], [18, 18], [19, 1], [20, 43], [21, 3], [22, 12], [23, 23]], "zc": {"새벽": 269, "오전": 12, "오후": 158, "저녁": 65, "심야": 35}}, "문방구아저씨": {"np": 1982, "nl": 191, "th": 1010, "tg": "남녀공용", "ok": true, "pri": [{"n": "원나블", "e": "shonen-classic", "s": null, "p": "원나블", "t": "남녀공용", "h": 371, "r": 36.7, "kw": {"원피스": 289, "나루토": 22, "블리치": 6, "로우": 1}}, {"n": "산리오 · 치이카와", "e": "sanrio-chiikawa", "s": null, "p": "산리오 · 치이카와", "t": "여성향", "h": 288, "r": 28.5, "kw": {"산리오": 189, "먼작귀": 72, "마이멜로디": 1, "키티": 1}}, {"n": "디즈니 · 픽사 · 지브리", "e": "disney-pixar-ghibli", "s": null, "p": "디즈니 · 픽사 · 지브리", "t": "전연령", "h": 133, "r": 13.2, "kw": {"디즈니": 108, "스티치": 2, "토토로": 1, "픽사": 1, "토이스토리": 1}}], "sec": [], "pd": [{"n": "쿠지", "e": "kuji", "h": 690, "r": 98.6, "kw": {"이치방쿠지": 640, "라스트원": 3, "용자": 3, "더블찬스": 2}}], "zs": [{"z": "새벽", "r": 41.6}, {"z": "심야", "r": 26.0}], "hr": [[0, 329], [1, 282], [2, 172], [3, 69], [4, 34], [5, 18], [6, 3], [7, 2], [8, 0], [9, 1], [10, 2], [11, 6], [12, 41], [13, 21], [14, 39], [15, 61], [16, 95], [17, 41], [18, 46], [19, 55], [20, 182], [21, 110], [22, 268], [23, 296]], "zc": {"새벽": 904, "오전": 14, "오후": 298, "저녁": 393, "심야": 564}}, "미돌": {"np": 870, "nl": 84, "th": 259, "tg": "남녀공용", "ok": true, "pri": [{"n": "히로아카", "e": "my-hero-academia", "s": null, "p": "히로아카", "t": "남녀공용", "h": 81, "r": 31.3, "kw": {"토가": 41, "미도리야": 21, "엔데버": 4, "바쿠고": 2, "츠유": 1}}, {"n": "귀주톱", "e": "shonen-modern", "s": null, "p": "귀주톱", "t": "남녀공용", "h": 75, "r": 29.0, "kw": {"젠이츠": 33, "주술": 7, "귀멸": 5, "주술회전": 5, "고죠": 2}}], "sec": [{"n": "서브컬처 · 미소녀", "e": "subculture-bishojo", "s": null, "p": "서브컬처 · 미소녀", "t": "남성향", "h": 40, "r": 15.4, "kw": {"미쿠": 21, "니케": 10, "렘": 3}}, {"n": "원나블", "e": "shonen-classic", "s": null, "p": "원나블", "t": "남녀공용", "h": 35, "r": 13.5, "kw": {"원피스": 12, "나루토": 6, "로우": 1, "도플라밍고": 1, "루피": 1}}], "pd": [{"n": "쿠지", "e": "kuji", "h": 349, "r": 81.2, "kw": {"용자": 118, "라원": 63, "일뜯": 41, "하위상": 32, "통용자": 21}}, {"n": "굿즈", "e": "goods", "h": 81, "r": 18.8, "kw": {"스티커": 24, "엽서": 15, "마그넷": 15, "아크릴": 14, "키링": 10}}], "zs": [{"z": "오후", "r": 28.4}, {"z": "심야", "r": 24.1}], "hr": [[0, 107], [1, 46], [2, 7], [3, 2], [4, 0], [5, 0], [6, 0], [7, 0], [8, 0], [9, 3], [10, 66], [11, 77], [12, 14], [13, 51], [14, 38], [15, 51], [16, 93], [17, 24], [18, 16], [19, 9], [20, 40], [21, 80], [22, 116], [23, 114]], "zc": {"새벽": 162, "오전": 146, "오후": 271, "저녁": 145, "심야": 230}}, "박뚜비": {"np": 1977, "nl": 200, "th": 2915, "tg": "남녀공용", "ok": true, "pri": [{"n": "귀주톱", "e": "shonen-modern", "s": null, "p": "귀주톱", "t": "남녀공용", "h": 856, "r": 29.4, "kw": {"주술": 301, "주술회전": 211, "체인소": 77, "귀멸": 29, "귀칼": 22}}, {"n": "히로아카", "e": "my-hero-academia", "s": null, "p": "히로아카", "t": "남녀공용", "h": 493, "r": 16.9, "kw": {"나히아": 479}}, {"n": "기타 애니", "e": "other-anime", "s": null, "p": "기타 애니", "t": "남녀공용", "h": 435, "r": 14.9, "kw": {"디지몬": 305, "헌헌": 22, "에반게리온": 17, "도라에몽": 11, "앙상블": 2}}], "sec": [{"n": "디즈니 · 픽사 · 지브리", "e": "disney-pixar-ghibli", "s": null, "p": "디즈니 · 픽사 · 지브리", "t": "전연령", "h": 139, "r": 4.8, "kw": {"디즈니": 65, "주토피아": 6, "토이스토리": 4, "스티치": 1}}], "pd": [{"n": "쿠지", "e": "kuji", "h": 199, "r": 42.9, "kw": {"용자": 115, "제일복권": 16, "라원": 13, "통용자": 7, "제복": 1}}, {"n": "가챠 · 랜덤", "e": "gacha-random", "h": 184, "r": 39.7, "kw": {"뽑기": 59, "가챠": 39, "랜박": 23, "리멘트": 19, "랜덤박스": 11}}, {"n": "굿즈", "e": "goods", "h": 81, "r": 17.5, "kw": {"마그넷": 21, "아크릴": 20, "스티커": 16, "뱃지": 7, "포스터": 5}}], "zs": [{"z": "새벽", "r": 67.9}], "hr": [[0, 577], [1, 368], [2, 231], [3, 180], [4, 94], [5, 28], [6, 3], [7, 0], [8, 0], [9, 0], [10, 16], [11, 0], [12, 0], [13, 22], [14, 1], [15, 4], [16, 2], [17, 2], [18, 19], [19, 19], [20, 69], [21, 97], [22, 205], [23, 240]], "zc": {"새벽": 1478, "오전": 19, "오후": 31, "저녁": 204, "심야": 445}}, "백수니": {"np": 1222, "nl": 84, "th": 864, "tg": "남녀공용", "ok": true, "pri": [{"n": "기타 애니", "e": "other-anime", "s": null, "p": "기타 애니", "t": "남녀공용", "h": 312, "r": 36.1, "kw": {"디지몬": 94, "베르세르크": 37, "유유백서": 36, "스파패": 36, "바키": 33}}, {"n": "산리오 · 치이카와", "e": "sanrio-chiikawa", "s": null, "p": "산리오 · 치이카와", "t": "여성향", "h": 222, "r": 25.7, "kw": {"산리오": 125, "키티": 61, "치이카와": 29}}, {"n": "원나블", "e": "shonen-classic", "s": null, "p": "원나블", "t": "남녀공용", "h": 104, "r": 12.0, "kw": {"블리치": 25, "원피스": 23, "오로성": 23, "나루토": 19}}], "sec": [{"n": "서브컬처 · 미소녀", "e": "subculture-bishojo", "s": null, "p": "서브컬처 · 미소녀", "t": "남성향", "h": 56, "r": 6.5, "kw": {"니케": 26, "미쿠": 25}}, {"n": "짱구", "e": "crayon-shinchan", "s": null, "p": "짱구", "t": "전연령", "h": 37, "r": 4.3, "kw": {"짱구": 35}}], "pd": [{"n": "쿠지", "e": "kuji", "h": 712, "r": 89.6, "kw": {"용자": 265, "제복": 125, "제일복권": 106, "ABC": 48, "라원": 42}}, {"n": "가챠 · 랜덤", "e": "gacha-random", "h": 69, "r": 8.7, "kw": {"랜박": 47, "랜덤박스": 12, "랜깡": 1}}], "zs": [{"z": "저녁", "r": 41.4}, {"z": "오후", "r": 29.8}], "hr": [[0, 64], [1, 100], [2, 32], [3, 2], [4, 0], [5, 4], [6, 1], [7, 2], [8, 1], [9, 2], [10, 35], [11, 36], [12, 34], [13, 27], [14, 3], [15, 52], [16, 132], [17, 141], [18, 155], [19, 133], [20, 146], [21, 107], [22, 20], [23, 77]], "zc": {"새벽": 202, "오전": 77, "오후": 389, "저녁": 541, "심야": 97}}, "버츄얼토이": {"np": 1996, "nl": 76, "th": 61, "tg": null, "ok": false, "pri": [], "sec": [{"n": "귀주톱", "e": "shonen-modern", "s": null, "p": "귀주톱", "t": "남녀공용", "h": 35, "r": 57.4, "kw": {"귀멸": 12, "체인소": 3, "교메이": 1, "주술": 1, "주술회전": 1}}], "pd": [], "zs": [{"z": "저녁", "r": 45.6}, {"z": "심야", "r": 32.8}], "hr": [[0, 248], [1, 93], [2, 25], [3, 0], [4, 0], [5, 0], [6, 0], [7, 0], [8, 0], [9, 0], [10, 0], [11, 2], [12, 6], [13, 17], [14, 32], [15, 11], [16, 5], [17, 9], [18, 38], [19, 221], [20, 340], [21, 346], [22, 351], [23, 328]], "zc": {"새벽": 366, "오전": 2, "오후": 80, "저녁": 945, "심야": 679}}, "베티의숲": {"np": 2000, "nl": 180, "th": 661, "tg": "남녀공용", "ok": true, "pri": [{"n": "히로아카", "e": "my-hero-academia", "s": null, "p": "히로아카", "t": "남녀공용", "h": 283, "r": 42.8, "kw": {"나히아": 278}}, {"n": "기타 애니", "e": "other-anime", "s": null, "p": "기타 애니", "t": "남녀공용", "h": 184, "r": 27.8, "kw": {"오등분": 143, "하이큐": 7, "은혼": 5, "최애": 3, "도원암귀": 1}}, {"n": "산리오 · 치이카와", "e": "sanrio-chiikawa", "s": null, "p": "산리오 · 치이카와", "t": "여성향", "h": 111, "r": 16.8, "kw": {"산리오": 88, "키티": 4, "교동": 4}}], "sec": [{"n": "원나블", "e": "shonen-classic", "s": null, "p": "원나블", "t": "남녀공용", "h": 45, "r": 6.8, "kw": {"나루토": 39, "원피스": 1, "로우": 1}}], "pd": [{"n": "쿠지", "e": "kuji", "h": 930, "r": 95.3, "kw": {"제복": 739, "용자": 96, "제일복권": 63, "일뜯": 2, "ABC": 1}}], "zs": [{"z": "새벽", "r": 46.4}, {"z": "심야", "r": 44.4}], "hr": [[0, 505], [1, 254], [2, 117], [3, 74], [4, 54], [5, 8], [6, 0], [7, 0], [8, 0], [9, 0], [10, 2], [11, 8], [12, 20], [13, 4], [14, 3], [15, 1], [16, 0], [17, 0], [18, 2], [19, 1], [20, 8], [21, 151], [22, 429], [23, 539]], "zc": {"새벽": 1012, "오전": 10, "오후": 28, "저녁": 162, "심야": 968}}, "빈티지": {"np": 2000, "nl": 120, "th": 1806, "tg": "남녀공용", "ok": true, "pri": [{"n": "귀주톱", "e": "shonen-modern", "s": null, "p": "귀주톱", "t": "남녀공용", "h": 565, "r": 31.3, "kw": {"주술": 335, "귀칼": 76, "귀멸": 41, "첸소": 21, "주술회전": 15}}, {"n": "원나블", "e": "shonen-classic", "s": null, "p": "원나블", "t": "남녀공용", "h": 429, "r": 23.8, "kw": {"나루토": 324, "블리치": 29, "ㄴㄹㅌ": 11, "원피스": 11, "아카츠키": 1}}, {"n": "기타 애니", "e": "other-anime", "s": null, "p": "기타 애니", "t": "남녀공용", "h": 317, "r": 17.6, "kw": {"코난": 191, "헌헌": 36, "디지몬": 28, "하이큐": 24, "은혼": 5}}], "sec": [{"n": "산리오 · 치이카와", "e": "sanrio-chiikawa", "s": null, "p": "산리오 · 치이카와", "t": "여성향", "h": 106, "r": 5.9, "kw": {"산리오": 58}}], "pd": [{"n": "가챠 · 랜덤", "e": "gacha-random", "h": 79, "r": 60.3, "kw": {"랜박": 59, "캡슐": 1}}, {"n": "쿠지", "e": "kuji", "h": 26, "r": 19.8, "kw": {"용자": 7, "제일복권": 5, "제복": 1}}, {"n": "굿즈", "e": "goods", "h": 26, "r": 19.8, "kw": {"마그넷": 22, "아크릴": 2, "키링": 1}}], "zs": [{"z": "새벽", "r": 80.6}], "hr": [[0, 508], [1, 364], [2, 330], [3, 275], [4, 160], [5, 72], [6, 48], [7, 35], [8, 1], [9, 0], [10, 0], [11, 0], [12, 0], [13, 2], [14, 1], [15, 4], [16, 2], [17, 3], [18, 2], [19, 0], [20, 1], [21, 1], [22, 1], [23, 310]], "zc": {"새벽": 1709, "오전": 84, "오후": 12, "저녁": 4, "심야": 311}}, "산돌이": {"np": 1981, "nl": 183, "th": 1264, "tg": "남녀공용", "ok": true, "pri": [{"n": "귀주톱", "e": "shonen-modern", "s": null, "p": "귀주톱", "t": "남녀공용", "h": 472, "r": 37.3, "kw": {"체인소": 93, "주술": 71, "주술회전": 49, "귀멸": 40, "귀칼": 33}}, {"n": "진격의 거인", "e": "attack-on-titan", "s": null, "p": "진격의 거인", "t": "남녀공용", "h": 261, "r": 20.6, "kw": {"진격의": 63, "거인": 63, "진격거": 6, "에렌": 5, "초대형": 2}}, {"n": "히로아카", "e": "my-hero-academia", "s": null, "p": "히로아카", "t": "남녀공용", "h": 202, "r": 16.0, "kw": {"나히아": 168, "올마이트": 2, "바쿠고": 1}}], "sec": [], "pd": [{"n": "쿠지", "e": "kuji", "h": 2578, "r": 96.6, "kw": {"야생": 1016, "용자": 554, "하위상": 261, "제일복권": 200, "라원": 151}}], "zs": [{"z": "새벽", "r": 42.1}, {"z": "저녁", "r": 29.8}], "hr": [[0, 311], [1, 181], [2, 218], [3, 194], [4, 8], [5, 0], [6, 0], [7, 0], [8, 0], [9, 0], [10, 0], [11, 15], [12, 14], [13, 2], [14, 1], [15, 1], [16, 4], [17, 26], [18, 19], [19, 188], [20, 115], [21, 323], [22, 266], [23, 278]], "zc": {"새벽": 912, "오전": 15, "오후": 48, "저녁": 645, "심야": 544}}, "수박한조각": {"np": 1988, "nl": 129, "th": 909, "tg": "남녀공용", "ok": true, "pri": [{"n": "기타 애니", "e": "other-anime", "s": null, "p": "기타 애니", "t": "남녀공용", "h": 224, "r": 24.6, "kw": {"은혼": 67, "디지몬": 54, "봇치": 49, "데스노트": 22, "헌헌": 2}}, {"n": "귀주톱", "e": "shonen-modern", "s": null, "p": "귀주톱", "t": "남녀공용", "h": 221, "r": 24.3, "kw": {"귀멸": 112, "주술": 42, "귀칼": 23, "시노부": 20, "주술회전": 2}}, {"n": "원나블", "e": "shonen-classic", "s": null, "p": "원나블", "t": "남녀공용", "h": 180, "r": 19.8, "kw": {"나루토": 68, "로우": 37, "원피스": 21, "오로성": 9, "블리치": 7}}], "sec": [{"n": "드래곤볼", "e": "dragon-ball", "s": null, "p": "드래곤볼", "t": "남성향", "h": 72, "r": 7.9, "kw": {"드볼": 62, "초사이어인": 4}}], "pd": [{"n": "쿠지", "e": "kuji", "h": 1474, "r": 94.1, "kw": {"야생": 574, "일뜯": 264, "용자": 203, "제일복권": 167, "통용자": 46}}], "zs": [{"z": "저녁", "r": 44.5}, {"z": "오후", "r": 22.3}], "hr": [[0, 53], [1, 127], [2, 182], [3, 54], [4, 28], [5, 1], [6, 0], [7, 0], [8, 0], [9, 0], [10, 0], [11, 0], [12, 2], [13, 2], [14, 31], [15, 111], [16, 184], [17, 143], [18, 277], [19, 208], [20, 210], [21, 248], [22, 255], [23, 1]], "zc": {"새벽": 445, "오전": 0, "오후": 473, "저녁": 943, "심야": 256}}, "아오지금광": {"np": 1033, "nl": 77, "th": 250, "tg": "남성향", "ok": true, "pri": [{"n": "서브컬처 · 미소녀", "e": "subculture-bishojo", "s": null, "p": "서브컬처 · 미소녀", "t": "남성향", "h": 190, "r": 76.0, "kw": {"페이트": 59, "니케": 40, "홀로라이브": 29, "미쿠": 4}}], "sec": [], "pd": [{"n": "쿠지", "e": "kuji", "h": 823, "r": 100.0, "kw": {"용자": 201, "야생": 191, "일뜯": 151, "라원": 91, "ABC": 15}}], "zs": [{"z": "심야", "r": 37.5}, {"z": "새벽", "r": 31.3}], "hr": [[0, 225], [1, 105], [2, 17], [3, 0], [4, 0], [5, 0], [6, 0], [7, 0], [8, 0], [9, 1], [10, 0], [11, 7], [12, 0], [13, 11], [14, 66], [15, 36], [16, 47], [17, 38], [18, 7], [19, 12], [20, 22], [21, 100], [22, 191], [23, 225]], "zc": {"새벽": 347, "오전": 8, "오후": 198, "저녁": 141, "심야": 416}}, "엄마이건사야해": {"np": 1942, "nl": 113, "th": 1936, "tg": "남녀공용", "ok": true, "pri": [{"n": "귀주톱", "e": "shonen-modern", "s": null, "p": "귀주톱", "t": "남녀공용", "h": 832, "r": 43.0, "kw": {"주술": 304, "체인소": 110, "주술회전": 104, "귀칼": 59, "귀멸": 22}}, {"n": "포켓몬", "e": "pokemon", "s": null, "p": "포켓몬", "t": "전연령", "h": 332, "r": 17.1, "kw": {"포켓몬": 183, "포켓몬스터": 35, "이브이": 9}}, {"n": "기타 애니", "e": "other-anime", "s": null, "p": "기타 애니", "t": "남녀공용", "h": 194, "r": 10.0, "kw": {"디지몬": 61, "강연금": 48, "괴8": 35, "데스노트": 5, "코난": 3}}], "sec": [{"n": "진격의 거인", "e": "attack-on-titan", "s": null, "p": "진격의 거인", "t": "남녀공용", "h": 100, "r": 5.2, "kw": {"진격거": 68, "ㅈㄱㄱ": 5, "진격의": 4, "거인": 4}}, {"n": "디즈니 · 픽사 · 지브리", "e": "disney-pixar-ghibli", "s": null, "p": "디즈니 · 픽사 · 지브리", "t": "전연령", "h": 96, "r": 5.0, "kw": {"디즈니": 26, "미키": 17, "픽사": 4, "주토피아": 1}}, {"n": "산리오 · 치이카와", "e": "sanrio-chiikawa", "s": null, "p": "산리오 · 치이카와", "t": "여성향", "h": 86, "r": 4.4, "kw": {"산리오": 26, "키티": 17}}], "pd": [{"n": "가챠 · 랜덤", "e": "gacha-random", "h": 89, "r": 83.2, "kw": {"가챠": 78, "뽑기": 3, "랜깡": 1}}], "zs": [{"z": "새벽", "r": 45.9}, {"z": "오전", "r": 21.6}], "hr": [[0, 163], [1, 212], [2, 218], [3, 125], [4, 126], [5, 99], [6, 167], [7, 109], [8, 43], [9, 23], [10, 54], [11, 48], [12, 23], [13, 9], [14, 25], [15, 12], [16, 5], [17, 19], [18, 2], [19, 4], [20, 43], [21, 161], [22, 157], [23, 208]], "zc": {"새벽": 943, "오전": 444, "오후": 93, "저녁": 210, "심야": 365}}, "연쿠연쿠": {"np": 2000, "nl": 200, "th": 697, "tg": "남성향", "ok": true, "pri": [{"n": "서브컬처 · 미소녀", "e": "subculture-bishojo", "s": null, "p": "서브컬처 · 미소녀", "t": "남성향", "h": 170, "r": 24.4, "kw": {"니케": 111, "미쿠": 39, "블루아카": 4, "우마무스메": 2}}, {"n": "기타 애니", "e": "other-anime", "s": null, "p": "기타 애니", "t": "남녀공용", "h": 166, "r": 23.8, "kw": {"스파패": 73, "하이큐": 26, "전생슬": 7, "은혼": 6, "죠죠": 5}}, {"n": "드래곤볼", "e": "dragon-ball", "s": null, "p": "드래곤볼", "t": "남성향", "h": 130, "r": 18.7, "kw": {"드볼": 124}}], "sec": [{"n": "짱구", "e": "crayon-shinchan", "s": null, "p": "짱구", "t": "전연령", "h": 54, "r": 7.7, "kw": {"짱구": 52}}, {"n": "디즈니 · 픽사 · 지브리", "e": "disney-pixar-ghibli", "s": null, "p": "디즈니 · 픽사 · 지브리", "t": "전연령", "h": 46, "r": 6.6, "kw": {"디즈니": 29, "주토피아": 4, "토이스토리": 2}}, {"n": "산리오 · 치이카와", "e": "sanrio-chiikawa", "s": null, "p": "산리오 · 치이카와", "t": "여성향", "h": 30, "r": 4.3, "kw": {"산리오": 3, "쿠로미": 3, "치이카와": 2, "교동": 2, "모몽가": 1}}], "pd": [{"n": "쿠지", "e": "kuji", "h": 1484, "r": 98.5, "kw": {"야생": 994, "일뜯": 238, "용자": 92, "아타리": 32, "라원": 21}}], "zs": [{"z": "오후", "r": 49.5}, {"z": "저녁", "r": 27.8}], "hr": [[0, 136], [1, 89], [2, 74], [3, 79], [4, 1], [5, 0], [6, 0], [7, 0], [8, 0], [9, 0], [10, 0], [11, 0], [12, 19], [13, 96], [14, 152], [15, 205], [16, 247], [17, 370], [18, 295], [19, 210], [20, 94], [21, 12], [22, 47], [23, 74]], "zc": {"새벽": 379, "오전": 0, "오후": 1089, "저녁": 611, "심야": 121}}, "와쿠와쿠지": {"np": 1742, "nl": 94, "th": 1251, "tg": "남녀공용", "ok": true, "pri": [{"n": "원나블", "e": "shonen-classic", "s": null, "p": "원나블", "t": "남녀공용", "h": 562, "r": 44.9, "kw": {"원피스": 504, "나루토": 23, "니카": 2}}, {"n": "서브컬처 · 미소녀", "e": "subculture-bishojo", "s": null, "p": "서브컬처 · 미소녀", "t": "남성향", "h": 271, "r": 21.7, "kw": {"미쿠": 149, "니어오토마타": 65, "우마무스메": 35, "블루아카": 6}}, {"n": "기타 애니", "e": "other-anime", "s": null, "p": "기타 애니", "t": "남녀공용", "h": 220, "r": 17.6, "kw": {"전생슬": 88, "유유백서": 49, "체리": 37, "에반게리온": 24, "하이큐": 3}}], "sec": [], "pd": [{"n": "쿠지", "e": "kuji", "h": 490, "r": 92.6, "kw": {"야생": 140, "제일복권": 135, "용자": 122, "라원": 45, "일뜯": 4}}], "zs": [{"z": "새벽", "r": 54.8}, {"z": "심야", "r": 30.1}], "hr": [[0, 521], [1, 297], [2, 147], [3, 41], [4, 0], [5, 0], [6, 0], [7, 0], [8, 0], [9, 0], [10, 0], [11, 0], [12, 16], [13, 6], [14, 1], [15, 39], [16, 51], [17, 55], [18, 1], [19, 40], [20, 32], [21, 36], [22, 168], [23, 385]], "zc": {"새벽": 1006, "오전": 0, "오후": 168, "저녁": 109, "심야": 553}}, "월향": {"np": 1946, "nl": 200, "th": 1734, "tg": "남녀공용", "ok": true, "pri": [{"n": "기타 애니", "e": "other-anime", "s": null, "p": "기타 애니", "t": "남녀공용", "h": 468, "r": 27.0, "kw": {"오등분": 123, "스파패": 96, "최애": 63, "청춘돼지": 30, "디지몬": 17}}, {"n": "원나블", "e": "shonen-classic", "s": null, "p": "원나블", "t": "남녀공용", "h": 334, "r": 19.3, "kw": {"원피스": 149, "나루토": 51, "루피": 9, "블리치": 7, "니카": 6}}, {"n": "귀주톱", "e": "shonen-modern", "s": null, "p": "귀주톱", "t": "남녀공용", "h": 264, "r": 15.2, "kw": {"주술": 84, "귀칼": 31, "주술회전": 27, "첸소": 25, "체인소": 10}}], "sec": [{"n": "산리오 · 치이카와", "e": "sanrio-chiikawa", "s": null, "p": "산리오 · 치이카와", "t": "여성향", "h": 116, "r": 6.7, "kw": {"산리오": 58, "치이카와": 21, "시나모롤": 11, "하치와레": 3, "우사기": 1}}], "pd": [{"n": "굿즈", "e": "goods", "h": 283, "r": 58.2, "kw": {"인형": 234, "씰": 18, "아크릴": 12, "스탠드": 7, "포스터": 2}}, {"n": "가챠 · 랜덤", "e": "gacha-random", "h": 187, "r": 38.5, "kw": {"리멘트": 126, "가챠": 22, "랜박": 14, "랜깡": 11}}], "zs": [{"z": "새벽", "r": 46.4}, {"z": "심야", "r": 36.2}], "hr": [[0, 494], [1, 270], [2, 123], [3, 48], [4, 34], [5, 27], [6, 0], [7, 0], [8, 0], [9, 0], [10, 0], [11, 1], [12, 0], [13, 0], [14, 4], [15, 8], [16, 32], [17, 47], [18, 59], [19, 81], [20, 43], [21, 98], [22, 138], [23, 639]], "zc": {"새벽": 996, "오전": 1, "오후": 91, "저녁": 281, "심야": 777}}, "이크에크": {"np": 1993, "nl": 200, "th": 1260, "tg": "남녀공용", "ok": true, "pri": [{"n": "히로아카", "e": "my-hero-academia", "s": null, "p": "히로아카", "t": "남녀공용", "h": 338, "r": 26.8, "kw": {"나히아": 293}}, {"n": "기타 애니", "e": "other-anime", "s": null, "p": "기타 애니", "t": "남녀공용", "h": 301, "r": 23.9, "kw": {"봇치": 155, "프리큐어": 42, "데스노트": 34, "디지몬": 29, "헌헌": 4}}, {"n": "귀주톱", "e": "shonen-modern", "s": null, "p": "귀주톱", "t": "남녀공용", "h": 205, "r": 16.3, "kw": {"귀칼": 85, "주술": 38, "도우마": 29, "주술회전": 23, "귀멸": 1}}], "sec": [{"n": "서브컬처 · 미소녀", "e": "subculture-bishojo", "s": null, "p": "서브컬처 · 미소녀", "t": "남성향", "h": 68, "r": 5.4, "kw": {"니케": 62, "렘": 1, "미쿠": 1}}], "pd": [{"n": "쿠지", "e": "kuji", "h": 2463, "r": 94.0, "kw": {"용자": 918, "라원": 738, "야생": 425, "A상": 45, "하위상": 33}}], "zs": [{"z": "저녁", "r": 33.8}, {"z": "오후", "r": 22.0}], "hr": [[0, 213], [1, 128], [2, 63], [3, 48], [4, 10], [5, 0], [6, 0], [7, 0], [8, 20], [9, 0], [10, 10], [11, 9], [12, 7], [13, 16], [14, 60], [15, 118], [16, 132], [17, 150], [18, 139], [19, 143], [20, 183], [21, 276], [22, 218], [23, 250]], "zc": {"새벽": 462, "오전": 39, "오후": 483, "저녁": 741, "심야": 468}}, "임도하": {"np": 1951, "nl": 200, "th": 3295, "tg": "여성향", "ok": true, "pri": [{"n": "산리오 · 치이카와", "e": "sanrio-chiikawa", "s": null, "p": "산리오 · 치이카와", "t": "여성향", "h": 1105, "r": 33.5, "kw": {"산리오": 490, "ㅅㄹㅇ": 329, "키티": 5, "교동": 4, "한교동": 4}}, {"n": "짱구", "e": "crayon-shinchan", "s": null, "p": "짱구", "t": "전연령", "h": 796, "r": 24.2, "kw": {"짱구": 487, "ㅉㄱ": 54}}, {"n": "귀주톱", "e": "shonen-modern", "s": null, "p": "귀주톱", "t": "남녀공용", "h": 721, "r": 21.9, "kw": {"주술": 244, "주술회전": 99, "귀칼": 40, "귀멸": 39, "ㅈㅅㅎㅈ": 28}}], "sec": [{"n": "원나블", "e": "shonen-classic", "s": null, "p": "원나블", "t": "남녀공용", "h": 249, "r": 7.6, "kw": {"원피스": 92, "나루토": 70, "ㅇㅍㅅ": 3}}, {"n": "서브컬처 · 미소녀", "e": "subculture-bishojo", "s": null, "p": "서브컬처 · 미소녀", "t": "남성향", "h": 218, "r": 6.6, "kw": {"미쿠": 94, "페이트": 82, "홀로라이브": 17}}], "pd": [{"n": "쿠지", "e": "kuji", "h": 594, "r": 83.9, "kw": {"용자": 129, "하위상": 119, "야생": 78, "제복": 62, "라원": 52}}, {"n": "가챠 · 랜덤", "e": "gacha-random", "h": 74, "r": 10.5, "kw": {"가챠": 25, "랜박": 18, "랜깡": 13}}], "zs": [{"z": "오후", "r": 37.4}, {"z": "저녁", "r": 30.1}], "hr": [[0, 130], [1, 99], [2, 39], [3, 42], [4, 3], [5, 0], [6, 0], [7, 0], [8, 2], [9, 1], [10, 2], [11, 12], [12, 56], [13, 31], [14, 81], [15, 121], [16, 248], [17, 268], [18, 176], [19, 131], [20, 89], [21, 251], [22, 138], [23, 231]], "zc": {"새벽": 313, "오전": 17, "오후": 805, "저녁": 647, "심야": 369}}, "자유의에렌": {"np": 1994, "nl": 123, "th": 2035, "tg": "남녀공용", "ok": true, "pri": [{"n": "귀주톱", "e": "shonen-modern", "s": null, "p": "귀주톱", "t": "남녀공용", "h": 837, "r": 41.1, "kw": {"주술": 201, "주술회전": 197, "귀멸": 154, "귀멸의칼날": 132, "귀칼": 65}}, {"n": "기타 애니", "e": "other-anime", "s": null, "p": "기타 애니", "t": "남녀공용", "h": 555, "r": 27.3, "kw": {"하이큐": 202, "코난": 196, "그비돌": 114, "봇치": 3, "은혼": 3}}, {"n": "진격의 거인", "e": "attack-on-titan", "s": null, "p": "진격의 거인", "t": "남녀공용", "h": 277, "r": 13.6, "kw": {"진격의": 85, "거인": 85, "리바이": 79, "진격거": 8}}], "sec": [{"n": "원나블", "e": "shonen-classic", "s": null, "p": "원나블", "t": "남녀공용", "h": 87, "r": 4.3, "kw": {"나루토": 69, "원피스": 6}}], "pd": [{"n": "굿즈", "e": "goods", "h": 1016, "r": 60.4, "kw": {"아크릴": 562, "엽서": 174, "뱃지": 101, "캔뱃지": 101, "스탠드": 6}}, {"n": "쿠지", "e": "kuji", "h": 413, "r": 24.6, "kw": {"하위상": 210, "제일복권": 122, "제복": 58, "B상": 1, "A상": 1}}, {"n": "가챠 · 랜덤", "e": "gacha-random", "h": 253, "r": 15.0, "kw": {"가챠": 163, "랜깡": 25, "랜박": 12, "리멘트": 1}}], "zs": [{"z": "저녁", "r": 75.2}], "hr": [[0, 26], [1, 1], [2, 0], [3, 0], [4, 0], [5, 0], [6, 0], [7, 0], [8, 0], [9, 0], [10, 0], [11, 0], [12, 0], [13, 1], [14, 2], [15, 0], [16, 0], [17, 0], [18, 45], [19, 354], [20, 780], [21, 413], [22, 272], [23, 223]], "zc": {"새벽": 27, "오전": 0, "오후": 3, "저녁": 1592, "심야": 495}}, "제이랜드": {"np": 1976, "nl": 200, "th": 681, "tg": "남녀공용", "ok": true, "pri": [{"n": "귀주톱", "e": "shonen-modern", "s": null, "p": "귀주톱", "t": "남녀공용", "h": 276, "r": 40.5, "kw": {"주술": 42, "주술회전": 39, "귀멸": 32, "귀칼": 12, "체인소": 11}}, {"n": "산리오 · 치이카와", "e": "sanrio-chiikawa", "s": null, "p": "산리오 · 치이카와", "t": "여성향", "h": 120, "r": 17.6, "kw": {"산리오": 54, "치이카와": 6}}, {"n": "원나블", "e": "shonen-classic", "s": null, "p": "원나블", "t": "남녀공용", "h": 90, "r": 13.2, "kw": {"나루토": 21, "원피스": 21, "블리치": 2, "오로성": 1}}], "sec": [{"n": "짱구", "e": "crayon-shinchan", "s": null, "p": "짱구", "t": "전연령", "h": 42, "r": 6.2, "kw": {"짱구": 21}}], "pd": [{"n": "쿠지", "e": "kuji", "h": 218, "r": 82.0, "kw": {"용자": 77, "통용자": 70, "제복": 8, "제일복권": 8, "장당": 5}}, {"n": "가챠 · 랜덤", "e": "gacha-random", "h": 44, "r": 16.5, "kw": {"랜박": 11, "가챠": 9, "랜깡": 2}}], "zs": [{"z": "저녁", "r": 63.6}], "hr": [[0, 7], [1, 18], [2, 12], [3, 9], [4, 5], [5, 0], [6, 1], [7, 0], [8, 21], [9, 0], [10, 0], [11, 0], [12, 0], [13, 0], [14, 0], [15, 2], [16, 1], [17, 24], [18, 588], [19, 43], [20, 190], [21, 562], [22, 528], [23, 165]], "zc": {"새벽": 51, "오전": 22, "오후": 27, "저녁": 1383, "심야": 693}}, "천동": {"np": 1997, "nl": 200, "th": 2206, "tg": "남녀공용", "ok": true, "pri": [{"n": "귀주톱", "e": "shonen-modern", "s": null, "p": "귀주톱", "t": "남녀공용", "h": 891, "r": 40.4, "kw": {"주술": 352, "귀칼": 137, "주술회전": 93, "귀멸": 28, "도우마": 10}}, {"n": "원나블", "e": "shonen-classic", "s": null, "p": "원나블", "t": "남녀공용", "h": 555, "r": 25.2, "kw": {"나루토": 235, "원피스": 119}}, {"n": "히로아카", "e": "my-hero-academia", "s": null, "p": "히로아카", "t": "남녀공용", "h": 349, "r": 15.8, "kw": {"나히아": 311, "하가쿠레": 2}}], "sec": [{"n": "진격의 거인", "e": "attack-on-titan", "s": null, "p": "진격의 거인", "t": "남녀공용", "h": 120, "r": 5.4, "kw": {"진격의": 27, "거인": 27, "진격거": 6}}, {"n": "기타 애니", "e": "other-anime", "s": null, "p": "기타 애니", "t": "남녀공용", "h": 91, "r": 4.1, "kw": {"코난": 26, "스파패": 22, "하이큐": 13, "헌헌": 2, "디지몬": 2}}], "pd": [{"n": "쿠지", "e": "kuji", "h": 1624, "r": 95.5, "kw": {"야생": 776, "용자": 437, "라원": 78, "일뜯": 57, "제복": 46}}], "zs": [{"z": "새벽", "r": 79.7}], "hr": [[0, 173], [1, 396], [2, 604], [3, 297], [4, 185], [5, 95], [6, 34], [7, 3], [8, 8], [9, 13], [10, 1], [11, 0], [12, 2], [13, 0], [14, 0], [15, 1], [16, 3], [17, 37], [18, 16], [19, 26], [20, 46], [21, 79], [22, 115], [23, 63]], "zc": {"새벽": 1750, "오전": 59, "오후": 43, "저녁": 167, "심야": 178}}, "프람": {"np": 1970, "nl": 82, "th": 167, "tg": "남녀공용", "ok": true, "pri": [{"n": "귀주톱", "e": "shonen-modern", "s": null, "p": "귀주톱", "t": "남녀공용", "h": 111, "r": 66.5, "kw": {"귀칼": 65, "귀멸": 39}}], "sec": [], "pd": [{"n": "쿠지", "e": "kuji", "h": 29, "r": 100.0, "kw": {"제복": 28}}], "zs": [{"z": "저녁", "r": 66.3}], "hr": [[0, 15], [1, 0], [2, 0], [3, 0], [4, 0], [5, 0], [6, 0], [7, 0], [8, 0], [9, 0], [10, 1], [11, 0], [12, 0], [13, 1], [14, 1], [15, 9], [16, 0], [17, 9], [18, 158], [19, 341], [20, 405], [21, 456], [22, 427], [23, 229]], "zc": {"새벽": 15, "오전": 1, "오후": 20, "저녁": 1360, "심야": 656}}, "화도": {"np": 1999, "nl": 73, "th": 692, "tg": "남녀공용", "ok": true, "pri": [{"n": "기타 애니", "e": "other-anime", "s": null, "p": "기타 애니", "t": "남녀공용", "h": 268, "r": 38.7, "kw": {"스파패": 145, "에반게리온": 61, "그비돌": 24, "데스노트": 18, "헌헌": 1}}, {"n": "원나블", "e": "shonen-classic", "s": null, "p": "원나블", "t": "남녀공용", "h": 146, "r": 21.1, "kw": {"나루토": 65, "원피스": 49, "아카츠키": 10}}, {"n": "짱구", "e": "crayon-shinchan", "s": null, "p": "짱구", "t": "전연령", "h": 143, "r": 20.7, "kw": {"짱구": 140}}], "sec": [{"n": "귀주톱", "e": "shonen-modern", "s": null, "p": "귀주톱", "t": "남녀공용", "h": 34, "r": 4.9, "kw": {"귀멸": 15, "귀칼": 2}}], "pd": [{"n": "쿠지", "e": "kuji", "h": 1156, "r": 99.8, "kw": {"라원": 465, "제복": 238, "용자": 227, "하위상": 168, "라스트원": 1}}], "zs": [{"z": "심야", "r": 34.4}, {"z": "저녁", "r": 32.1}], "hr": [[0, 178], [1, 89], [2, 59], [3, 40], [4, 1], [5, 0], [6, 1], [7, 15], [8, 14], [9, 11], [10, 14], [11, 24], [12, 61], [13, 2], [14, 10], [15, 11], [16, 44], [17, 119], [18, 140], [19, 97], [20, 146], [21, 283], [22, 463], [23, 250]], "zc": {"새벽": 367, "오전": 79, "오후": 247, "저녁": 666, "심야": 713}}}</script>
+<script>
+  const RAW = JSON.parse(document.getElementById('label-data').textContent);
+  const DEALERS = Object.keys(RAW);
+
+  const TAG_CLASS = {
+    "남성향":"male","여성향":"female","남녀공용":"mixed",
+    "전연령":"kids","혼합":"mixed"
+  };
+  const ZONE_META = {
+    '새벽': {hr:'00–06', em:'🌙'},
+    '오전': {hr:'06–12', em:'☀️'},
+    '오후': {hr:'12–18', em:'🌤'},
+    '저녁': {hr:'18–22', em:'🌆'},
+    '심야': {hr:'22–24', em:'🌌'},
+  };
+  const IP_EN_TO_KO = {
+    "shonen-classic":"원나블",
+    "shonen-modern":"귀주톱",
+    "attack-on-titan":"진격의 거인",
+    "dragon-ball":"드래곤볼",
+    "my-hero-academia":"히로아카",
+    "frieren":"프리렌",
+    "other-anime":"기타 애니",
+    "sanrio-chiikawa":"산리오·치이카와",
+    "crayon-shinchan":"짱구",
+    "disney-pixar-ghibli":"디즈니·픽사·지브리",
+    "pokemon":"포켓몬",
+    "marvel-dc-cartoon":"마블·DC·카툰",
+    "subculture-bishojo":"서브컬처·미소녀",
+  };
+
+  // State
+  let state = {
+    ip: new Set(),
+    target: new Set(),
+    zone: new Set(),
+    pd: new Set(),
+    q: "",
+  };
+
+  function kwChipsHtml(kw) {
+    return Object.entries(kw).slice(0, 5)
+      .map(([k,v]) => `<span class="kw-chip"><b>${k}</b> ${v}</span>`)
+      .join('');
+  }
+
+  function labelPillHtml(l, cls) {
+    const tagCls = TAG_CLASS[l.t] || 'mixed';
+    const name = l.p && l.s ? `${l.p} · ${l.n}` : l.n;
+    return `
+      <span class="label-pill ${cls}">
+        ${name}
+        <span class="share">${l.r}%</span>
+        <span class="tag ${tagCls}">${l.t}</span>
+      </span>`;
+  }
+
+  function zonePillHtml(z, isPrim) {
+    const meta = ZONE_META[z.z] || {hr:'', em:''};
+    return `<span class="zone-pill ${isPrim?'primary':''}">
+      <span>${meta.em} ${z.z}</span>
+      <span class="hr">${meta.hr}</span>
+      <span class="share">${z.r}%</span>
+    </span>`;
+  }
+
+  function pdPillHtml(p) {
+    const cls = p.e === 'kuji' ? 'k' : p.e === 'goods' ? 'g' : 'r';
+    return `<span class="pd-pill ${cls}">
+      ${p.n} <span class="share">${p.r}%</span>
+    </span>`;
+  }
+
+  function hourBarsHtml(hr) {
+    const vals = hr.map(([h,v])=>v);
+    const max = Math.max(...vals, 1);
+    const bars = hr.map(([h,v]) => {
+      const pct = v/max;
+      const cls = pct > 0.7 ? 'max' : pct > 0.35 ? 'mid' : '';
+      const height = Math.max(pct*100, v>0?8:0);
+      return `<div class="hour-bar ${cls}" style="height:${height}%" title="${h}시: ${v}건"></div>`;
+    }).join('');
+    return `
+      <div class="hour-bars">${bars}</div>
+      <div class="hour-axis">
+        <span>0시</span><span>6시</span><span>12시</span><span>18시</span>
+      </div>
+    `;
+  }
+
+  function dealerCard(name, d) {
+    const tgt = d.tg || '—';
+    const tgtCls = TAG_CLASS[tgt] || 'mixed';
+    const weakCls = d.ok ? '' : 'weak';
+
+    let body;
+    if (!d.ok || d.pri.length === 0) {
+      body = `
+        <div class="empty-msg">
+          ⚠ 상품명·라이브명에서 IP 키워드 히트 부족 (총 ${d.th}회).
+          범용 상품 중심으로 보이므로 수동 검토가 필요합니다.
+        </div>
+      `;
+    } else {
+      const priHtml = d.pri.map(l => labelPillHtml(l, 'pri')).join('');
+      const secHtml = d.sec.length ? d.sec.map(l => labelPillHtml(l, 'sec')).join('') : '<span style="font-size:11.5px;color:var(--gray-2);">(없음)</span>';
+      const zHtml = d.zs.map((z,i) => zonePillHtml(z, i===0)).join('');
+      const pdHtml = d.pd.length ? d.pd.map(pdPillHtml).join('') : '<span style="font-size:11.5px;color:var(--gray-2);">(히트 없음)</span>';
+
+      const evidenceRows = d.pri.map(l =>
+        `<div><span style="font-size:10.5px;color:var(--brand-dark);font-weight:700;">${l.n}</span>  ${kwChipsHtml(l.kw)}</div>`
+      ).join('');
+
+      body = `
+        <div class="block">
+          <div class="block-head">주 라벨 · Primary</div>
+          <div class="labels">${priHtml}</div>
+        </div>
+        <div class="block">
+          <div class="block-head">부 라벨 · Secondary</div>
+          <div class="labels">${secHtml}</div>
+        </div>
+        <div class="block">
+          <div class="block-head">활동 시간대</div>
+          <div class="zones-row">${zHtml}</div>
+          ${hourBarsHtml(d.hr)}
+        </div>
+        <div class="block">
+          <div class="block-head">상품 포맷</div>
+          <div class="pd-row">${pdHtml}</div>
+        </div>
+        <div class="block">
+          <div class="block-head">주요 매칭 키워드</div>
+          <div class="evidence">${evidenceRows}</div>
+        </div>
+      `;
+    }
+
+    const targetBadge = d.ok
+      ? `<span class="target-badge tag ${tgtCls}">${tgt}</span>`
+      : `<span class="target-badge" style="background:var(--weak);color:#fff;">라벨링 제한</span>`;
+
+    return `
+      <div class="dealer ${weakCls}" data-name="${name}">
+        <div class="dealer-head">
+          <div class="dealer-name">${name}${targetBadge}</div>
+          <div class="dealer-meta">판매 ${d.np}건 · 라이브 ${d.nl}개</div>
+        </div>
+        <div class="dealer-body">${body}</div>
+      </div>
+    `;
+  }
+
+  function autoRowHtml(name, d) {
+    if (!d.ok || d.pri.length === 0) {
+      return `<tr>
+        <td class="dealer-col">${name}</td>
+        <td colspan="5" style="color:var(--gray-2);font-style:italic;">라벨링 제한 — 상품명 범용</td>
+      </tr>`;
+    }
+    const priEn = d.pri.map(l => {
+      const en = l.s || l.e;
+      return `<span class="ten">${en}</span>`;
+    }).join('');
+    const secEn = d.sec.length
+      ? d.sec.map(l => `<span class="ten">${l.s || l.e}</span>`).join('')
+      : '<span style="color:var(--gray-2);">—</span>';
+    const tgtEn = {"남성향":"male-oriented","여성향":"female-oriented","남녀공용":"unisex","전연령":"all-ages","혼합":"mixed"}[d.tg] || '—';
+    const zones = d.zs.map(z => z.z).join(' · ');
+    const pd = d.pd.map(p => p.e).join(' · ') || '—';
+    return `<tr>
+      <td class="dealer-col">${name}</td>
+      <td class="en">${priEn}</td>
+      <td class="en">${secEn}</td>
+      <td class="en">${tgtEn}</td>
+      <td>${zones}</td>
+      <td class="en">${pd}</td>
+    </tr>`;
+  }
+
+  function matchFilter(name, d) {
+    // search
+    if (state.q) {
+      const q = state.q.toLowerCase();
+      if (!name.toLowerCase().includes(q)) {
+        // search keywords too
+        const allKw = [...d.pri, ...d.sec].flatMap(l => Object.keys(l.kw)).join(' ').toLowerCase();
+        if (!allKw.includes(q)) return false;
+      }
+    }
+    // IP filter: match if any primary/secondary has the en
+    if (state.ip.size > 0) {
+      const allEn = [...d.pri, ...d.sec].flatMap(l => [l.e, l.s]).filter(Boolean);
+      if (!Array.from(state.ip).some(f => allEn.includes(f))) return false;
+    }
+    // target
+    if (state.target.size > 0) {
+      if (!d.tg || !state.target.has(d.tg)) return false;
+    }
+    // zone - top zone or any listed zone
+    if (state.zone.size > 0) {
+      const zs = d.zs.map(z=>z.z);
+      if (!Array.from(state.zone).some(z => zs.includes(z))) return false;
+    }
+    // pd
+    if (state.pd.size > 0) {
+      const pds = d.pd.map(p=>p.e);
+      if (!Array.from(state.pd).some(p => pds.includes(p))) return false;
+    }
+    return true;
+  }
+
+  function render() {
+    // Sort dealers: labelable first, then by primary share, then name
+    const sorted = DEALERS.slice().sort((a,b) => {
+      const A = RAW[a], B = RAW[b];
+      if (A.ok !== B.ok) return A.ok ? -1 : 1;
+      const sA = A.pri[0]?.r || 0;
+      const sB = B.pri[0]?.r || 0;
+      if (sB !== sA) return sB - sA;
+      return a.localeCompare(b, 'ko');
+    });
+
+    const filtered = sorted.filter(n => matchFilter(n, RAW[n]));
+
+    // Stats
+    const labelable = sorted.filter(n => RAW[n].ok).length;
+    const totalProducts = sorted.reduce((s,n)=>s+RAW[n].np, 0);
+    const totalLives = sorted.reduce((s,n)=>s+RAW[n].nl, 0);
+    const totalPri = sorted.reduce((s,n)=>s+RAW[n].pri.length, 0);
+    document.getElementById('s-dealers').textContent = sorted.length;
+    document.getElementById('s-labelable').textContent = labelable;
+    document.getElementById('s-products').textContent = totalProducts.toLocaleString();
+    document.getElementById('s-lives').textContent = totalLives.toLocaleString();
+    document.getElementById('s-primary').textContent = totalPri;
+
+    // Grid
+    document.getElementById('dealer-grid').innerHTML =
+      filtered.map(n => dealerCard(n, RAW[n])).join('')
+      || '<div style="grid-column:1/-1;text-align:center;color:var(--gray);padding:40px;">조건에 맞는 딜러가 없습니다.</div>';
+
+    // Auto mapping table
+    document.getElementById('auto-tbody').innerHTML =
+      sorted.map(n => autoRowHtml(n, RAW[n])).join('');
+  }
+
+  // Build chip UIs
+  function countByKey(getKeys) {
+    const c = {};
+    DEALERS.forEach(n => {
+      const ks = getKeys(RAW[n]);
+      ks.forEach(k => c[k] = (c[k] || 0) + 1);
+    });
+    return c;
+  }
+
+  function makeChip(label, key, type, count) {
+    const chip = document.createElement('span');
+    chip.className = 'chip';
+    chip.dataset.key = key;
+    chip.dataset.type = type;
+    chip.innerHTML = count != null
+      ? `${label}<span class="count">${count}</span>`
+      : label;
+    chip.addEventListener('click', () => {
+      if (state[type].has(key)) state[type].delete(key);
+      else state[type].add(key);
+      chip.classList.toggle('active');
+      render();
+    });
+    return chip;
+  }
+
+  // IP chips — top-level categories (not sub-groups directly)
+  const IP_CHIP_ORDER = [
+    'shonen-classic','shonen-modern','attack-on-titan','dragon-ball','my-hero-academia','frieren',
+    'other-anime',
+    'sanrio-chiikawa','crayon-shinchan','disney-pixar-ghibli','pokemon','marvel-dc-cartoon','subculture-bishojo'
+  ];
+  const ipCountMap = countByKey(d => {
+    const set = new Set();
+    [...d.pri, ...d.sec].forEach(l => {
+      if (l.s) set.add(l.s);
+      else set.add(l.e);
+    });
+    return Array.from(set);
+  });
+  const ipChipBox = document.getElementById('ip-chips');
+  IP_CHIP_ORDER.forEach(en => {
+    const ko = IP_EN_TO_KO[en] || en;
+    const cnt = ipCountMap[en] || 0;
+    if (cnt === 0) return;
+    ipChipBox.appendChild(makeChip(ko, en, 'ip', cnt));
+  });
+
+  // Target chips
+  const tgtCountMap = countByKey(d => d.tg ? [d.tg] : []);
+  const tgtChipBox = document.getElementById('target-chips');
+  ['남성향','여성향','남녀공용','전연령'].forEach(t => {
+    if (!tgtCountMap[t]) return;
+    tgtChipBox.appendChild(makeChip(t, t, 'target', tgtCountMap[t]));
+  });
+
+  // Zone chips
+  const zoneCountMap = countByKey(d => d.zs.map(z=>z.z));
+  const zoneChipBox = document.getElementById('zone-chips');
+  ['새벽','오전','오후','저녁','심야'].forEach(z => {
+    const meta = ZONE_META[z];
+    const cnt = zoneCountMap[z] || 0;
+    if (cnt === 0) return;
+    zoneChipBox.appendChild(makeChip(`${meta.em} ${z}`, z, 'zone', cnt));
+  });
+
+  // PD chips
+  const pdCountMap = countByKey(d => d.pd.map(p=>p.e));
+  const pdChipBox = document.getElementById('pd-chips');
+  [['kuji','쿠지'],['goods','굿즈'],['gacha-random','가챠·랜덤']].forEach(([en,ko]) => {
+    const cnt = pdCountMap[en] || 0;
+    if (cnt === 0) return;
+    pdChipBox.appendChild(makeChip(ko, en, 'pd', cnt));
+  });
+
+  // Search
+  document.getElementById('search').addEventListener('input', e => {
+    state.q = e.target.value.trim();
+    render();
+  });
+
+  render();
+</script>
+</body>
+</html>

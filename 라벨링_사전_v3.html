@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IP·상품군별 라벨링 사전 v3.5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand: #CC785C;
+    --brand-dark: #A15A42;
+    --ink: #191919;
+    --gray: #6B6B6B;
+    --gray-2: #9a9a9a;
+    --soft: #F0EEE6;
+    --soft-2: #FAF9F5;
+    --border: #E5E3DC;
+    --male: #3B6AA6;
+    --female: #B55C90;
+    --neutral: #6F7C8C;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    color: var(--ink);
+    background: var(--soft-2);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 48px 32px 80px;
+  }
+  .brand-bar {
+    height: 4px;
+    background: var(--brand);
+    width: 100%;
+    position: fixed;
+    top: 0; left: 0;
+    z-index: 10;
+  }
+  header.doc-head {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 20px;
+    margin-bottom: 32px;
+  }
+  h1 {
+    font-size: 28px;
+    font-weight: 900;
+    margin: 0 0 6px;
+    letter-spacing: -0.02em;
+  }
+  .subtitle {
+    font-size: 13px;
+    color: var(--gray);
+    font-weight: 400;
+  }
+  .intro {
+    font-size: 14px;
+    color: #333;
+    line-height: 1.7;
+    margin: 24px 0 12px;
+  }
+  .stats {
+    display: flex;
+    gap: 18px;
+    margin: 20px 0 8px;
+    flex-wrap: wrap;
+  }
+  .stat {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 18px;
+    min-width: 140px;
+  }
+  .stat .n {
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--brand);
+    line-height: 1;
+  }
+  .stat .l {
+    font-size: 11px;
+    color: var(--gray);
+    margin-top: 4px;
+    letter-spacing: 0.02em;
+  }
+  h2.section {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--brand);
+    margin: 40px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--brand);
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  h2.section .sub {
+    font-size: 12px;
+    color: var(--gray);
+    font-weight: 400;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+  }
+  .card-head {
+    background: var(--soft);
+    padding: 14px 18px 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .card-name {
+    font-weight: 700;
+    font-size: 15.5px;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .en-label {
+    display: inline-block;
+    font-family: 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--brand-dark);
+    background: #fff;
+    border: 1px solid #E8D3C5;
+    padding: 2px 8px;
+    border-radius: 6px;
+    letter-spacing: 0.01em;
+  }
+  .en-label.sm {
+    font-size: 10.5px;
+    padding: 1px 6px;
+  }
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.03em;
+  }
+  .tag.male { background: var(--male); }
+  .tag.female { background: var(--female); }
+  .tag.mixed { background: var(--neutral); }
+  .tag.kids { background: #7fa87f; }
+  .card-desc {
+    font-size: 12px;
+    color: var(--gray);
+    margin-top: 3px;
+    font-weight: 400;
+  }
+  .card-meta {
+    font-size: 11px;
+    color: var(--gray-2);
+    white-space: nowrap;
+  }
+  .card-body {
+    padding: 14px 18px 16px;
+  }
+  .kw-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 0;
+    font-size: 13px;
+    line-height: 1.9;
+  }
+  .kw {
+    display: inline-block;
+    padding: 2px 10px;
+    margin-right: 4px;
+    background: #F7F5EE;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: #2a2a2a;
+    font-size: 12.5px;
+  }
+  .kw.jamo {
+    color: var(--gray);
+    font-family: monospace;
+    background: #fff;
+  }
+  .subcat {
+    padding: 12px 18px 14px;
+    border-top: 1px dashed var(--border);
+  }
+  .subcat:first-of-type { border-top: none; padding-top: 14px; }
+  .subcat-head {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+  .subcat-name {
+    font-weight: 700;
+    font-size: 13.5px;
+    color: var(--brand-dark);
+  }
+  .subcat-meta {
+    font-size: 10.5px;
+    color: var(--gray-2);
+    margin-left: auto;
+  }
+  .notes {
+    margin-top: 36px;
+    background: #FFF8F4;
+    border: 1px solid #F0D9CC;
+    border-radius: 12px;
+    padding: 18px 22px;
+    font-size: 13px;
+    line-height: 1.8;
+    color: #444;
+  }
+  .notes h3 {
+    margin: 0 0 8px;
+    font-size: 13px;
+    color: var(--brand-dark);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  .notes ul {
+    margin: 6px 0 0;
+    padding-left: 18px;
+  }
+  .notes li { margin-bottom: 4px; }
+  footer.doc-foot {
+    margin-top: 40px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--gray-2);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* Automation label map */
+  .auto-map {
+    margin-top: 16px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 22px;
+  }
+  .auto-map table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+  }
+  .auto-map th, .auto-map td {
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .auto-map th {
+    font-size: 11px;
+    color: var(--gray);
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    background: var(--soft);
+  }
+  .auto-map td.en {
+    font-family: 'SF Mono', Menlo, Consolas, monospace;
+    color: var(--brand-dark);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .auto-map td.ko { font-weight: 600; }
+  .auto-map tr.sub td.ko { padding-left: 24px; color: var(--gray); font-weight: 500; }
+  .auto-map tr.sub td.en { color: #A06A4B; }
+  .json-block {
+    background: #1f1d18;
+    color: #e8e4d8;
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-family: 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 11.5px;
+    line-height: 1.55;
+    overflow-x: auto;
+    margin-top: 12px;
+    white-space: pre;
+  }
+  .json-block .k { color: #E8A87C; }
+  .json-block .s { color: #B7D3B3; }
+  .json-block .c { color: #7d7a70; font-style: italic; }
+  .copy-btn {
+    float: right;
+    background: var(--brand);
+    color: #fff;
+    border: none;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .copy-btn:hover { background: var(--brand-dark); }
+
+  @media print {
+    body { background: #fff; }
+    .page { padding: 20px; max-width: 100%; }
+    .card { break-inside: avoid; page-break-inside: avoid; box-shadow: none; }
+    .brand-bar { position: static; }
+    h2.section { break-after: avoid; }
+  }
+
+  @media (max-width: 640px) {
+    .page { padding: 30px 18px 60px; }
+    h1 { font-size: 22px; }
+    h2.section { font-size: 17px; }
+    .card-name { font-size: 14px; }
+  }
+</style>
+</head>
+<body>
+<div class="brand-bar"></div>
+<div class="page">
+
+<header class="doc-head">
+  <h1>IP·상품군별 라벨링 사전</h1>
+  <div class="subtitle">v3.5 · 2026-04-21 · 딜러 자동 추천 온보딩 퍼널</div>
+
+  <p class="intro">
+    딜러별 판매 데이터(상품명·라이브명·설명 텍스트)를 스캔해 IP 기반 추천 라벨을 자동 부여하기 위한 키워드 사전입니다.
+    각 카테고리는 대표 시리즈와 하위 캐릭터·약어·초성 태그를 포함하며, 실제 커머스 상품명에서 관찰되는 표기 변이(예: 귀칼/귀멸/귀멸의칼날)를 모두 망라합니다.
+  </p>
+
+  <div class="stats">
+    <div class="stat"><div class="n" id="ipcnt">—</div><div class="l">IP 카테고리</div></div>
+    <div class="stat"><div class="n" id="ipkw">—</div><div class="l">IP 키워드</div></div>
+    <div class="stat"><div class="n" id="pdcnt">—</div><div class="l">상품 포맷</div></div>
+    <div class="stat"><div class="n" id="pdkw">—</div><div class="l">포맷 키워드</div></div>
+  </div>
+</header>
+
+<h2 class="section">1. IP 카테고리 <span class="sub">· 작품 · 캐릭터 · 시리즈명</span></h2>
+<div class="grid" id="ipgrid"></div>
+
+<h2 class="section">2. 상품 포맷 카테고리 <span class="sub">· 판매 방식 · 상품 유형</span></h2>
+<div class="grid" id="pdgrid"></div>
+
+<h2 class="section">3. 자동화용 영문 라벨 <span class="sub">· LLM 프롬프트 · DB 컬럼 · API 키</span></h2>
+<div class="auto-map">
+  <p style="font-size:13px; color:#555; margin:0 0 14px; line-height:1.7;">
+    상위 라벨의 한국어 표기와 자동화용 영문 라벨(kebab-case) 매핑입니다.
+    LLM 프롬프트, 데이터베이스 컬럼, API 스코어 키로 그대로 사용 가능합니다.
+  </p>
+  <table id="labelmap">
+    <thead>
+      <tr>
+        <th style="width: 40%">카테고리 (한국어)</th>
+        <th style="width: 30%">영문 라벨</th>
+        <th style="width: 15%">타겟</th>
+        <th style="width: 15%">영문 타겟</th>
+      </tr>
+    </thead>
+    <tbody id="labelmap-body"></tbody>
+  </table>
+
+  <div style="margin-top: 20px;">
+    <button class="copy-btn" onclick="copyJson()">JSON 복사</button>
+    <div style="font-size:12px; color:var(--gray); margin-bottom:4px; font-weight:600;">프롬프트용 JSON 스니펫</div>
+    <div class="json-block" id="jsonblock"></div>
+  </div>
+</div>
+
+<div class="notes">
+  <h3>운영 참고사항</h3>
+  <ul>
+    <li><b>조합 매칭 필수 키워드</b> — 단독 카운트 시 오탐 위험이 큰 키워드는 앵커와 동시 출현 조건을 걸어야 합니다: <i>거인</i>(+진격), <i>신룡</i>(+드볼/오공), <i>파워</i>(+체인소), <i>유리·철수</i>(+짱구), <i>푸</i>(→곰돌이푸), <i>ABC</i>(제거), <i>자석·스탠드·쿠션</i>(+캐릭터/아크릴).</li>
+    <li><b>쿠지 전용 분리</b> — <i>용자·통용자·라원·아타리·타이토·상위상·하위상</i>은 게임·서브컬처나 굿즈가 아니라 쿠지 카테고리(등급·브랜드 용어)에 포함.</li>
+    <li><b>초성 태그</b> — ㅈㄱㄱ·ㅎㄹㅇㅋ·ㅍㄹㄹ·ㄷㅈㄴ·ㄷㄹㄱㅂ·ㅅㄹㅇ·ㅊㅇㅋㅇ·ㅉㄱ·ㅇㅍㅅ·ㄴㄹㅌ·ㅂㄹㅊ·ㅊㅇㅅㅁ·ㅈㅅㅎㅈ·ㄱㅁㅇㅋㄴ 는 라이브 방송명에서 주로 등장하며 상품명 매칭 기여도는 낮습니다.</li>
+    <li><b>기타 애니 통합 운영</b> — v3.5에서 기타1/2/3 하위 구분을 폐기하고 단일 <i>other-anime</i> 라벨로 통합. 슬램덩크·블루록·유유백서 등 타겟이 유동적인 IP가 많고, 딜러 라이브업 구성상 하위 구분 실효성이 낮아 단순화. 세부 IP 매칭은 키워드 레벨에서 별도 대응.</li>
+    <li><b>피규어 의상 속성</b> — 서브컬처·미소녀의 <i>수영복·웨딩·교복</i>은 특정 IP가 아닌 피규어 상품 속성이므로 별도 보조 태그로 활용 가능.</li>
+  </ul>
+</div>
+
+<footer class="doc-foot">
+  <span>딜러 라벨링 프로젝트 · IP·상품군 사전</span>
+  <span>v3.5 · 2026-04-21</span>
+</footer>
+
+</div>
+
+<script>
+  const IP_CATS = [
+    {
+      name: "원나블",
+      en: "shonen-classic",
+      tag: "남녀공용",
+      desc: "소년만화 클래식 · 원피스 · 나루토 · 블리치",
+      kw: ["원피스","나루토","블리치","루피","조로","사스케","이치고","오로성","에이스","기어5","니카","샹크스","검은수염","도플라밍고","로우","키드","카이도","빅맘","사쿠라","카카시","이타치","마다라","아카츠키","루키아","아이젠","우르키오라","비비","상디","히나타","오리히메","그림죠","나미","우솝","흰수염","기어2","기어3","기어4","패왕색","베가펑크","징베","뱌쿠야","ㅇㅍㅅ","ㄴㄹㅌ","ㅂㄹㅊ"]
+    },
+    {
+      name: "귀주톱",
+      en: "shonen-modern",
+      tag: "남녀공용",
+      desc: "소년만화 현대 · 귀멸의 칼날 · 주술회전 · 체인소맨",
+      kw: ["귀멸의칼날","귀칼","귀멸","주술","주술회전","고죠","첸소","체인소","레제","마키마","시노부","포치타","사멸회유","사네미","무이치로","네즈코","탄지로","기유","렌고쿠","도우마","아카자","스쿠나","토우지","덴지","파워","아키","코베니","엔무","미츠리","교메이","이노스케","텐겐","겐야","젠이츠","무잔","카나오","이타도리","게토","마허라","ㅊㅇㅅㅁ","ㅈㅅㅎㅈ","ㄱㅁㅇㅋㄴ"]
+    },
+    {
+      name: "진격의 거인",
+      en: "attack-on-titan",
+      tag: "남녀공용",
+      desc: "에렌 · 미카사 · 아르민 · 조사병단",
+      kw: ["진격거","진격의","리바이","조사병단","초대형","거인","에렌","미카사","아르민","라이너","ㅈㄱㄱ"]
+    },
+    {
+      name: "드래곤볼",
+      en: "dragon-ball",
+      tag: "남성향",
+      desc: "손오공 · 베지터 · 초사이어인 · 고전 소년만화",
+      kw: ["드볼","오공","신룡","기뉴","브로리","베지터","프리저","마인부우","트랭크스","손오반","초사이어인","초사이언","손오공","ㄷㄹㄱㅂ","크리링","브루마","무천도사","야무치"]
+    },
+    {
+      name: "히로아카",
+      en: "my-hero-academia",
+      tag: "남녀공용",
+      desc: "나의 히어로 아카데미아",
+      kw: ["바쿠고","나히아","ㅎㄹㅇㅋ","토가","미도리야","쇼토","올마이트","올포원","엔데버","키리시마","츠유","하가쿠레"]
+    },
+    {
+      name: "프리렌",
+      en: "frieren",
+      tag: "남녀공용",
+      desc: "장송의 프리렌",
+      kw: ["페른","힘멜","장송","플람메","장송의","위벨","ㅍㄹㄹ"]
+    },
+    {
+      name: "기타 애니",
+      en: "other-anime",
+      tag: "남녀공용",
+      desc: "주요 IP 외 기타 애니메이션 · 소년만화 · 순정 · 서브컬처 통합",
+      kw: ["강철의연금술사","강연금","슬램덩크","데스노트","헌터X헌터","헌헌","디지몬","도라에몽","봇치","유유백서","도원암귀","스파패","호빵맨","사카모토","곤","키르아","은혼","괴수8호","괴8","도쿄구울","닥터스톤","블랙클로버","페어리테일","사이버펑크","공각기동대","코드기어스","단다단","비질랜티","코난","최애","그비돌","원펀맨","에반게리온","전생슬","죠죠","오등분","울트라맨","란마","아스카","유희왕","베르세르크","바키","북두의권","그렌라간","청춘돼지","가면라이더","슈퍼전대","고질라","케이온","하이큐","블루록","이누야샤","카드캡터","체리","카드캡터사쿠라","세일러문","프리큐어","앙상블","앙스타","테니스의왕자"]
+    },
+    {
+      name: "산리오 · 치이카와",
+      en: "sanrio-chiikawa",
+      tag: "여성향",
+      desc: "캐릭터 여성향 · 키티 · 시나모롤 · 먼작귀",
+      kw: ["산리오","치이카와","키티","시나모롤","폼폼푸린","교동","한교동","포차코","마멜","마이멜로디","쿠로미","케로피","ㅅㄹㅇ","먼작귀","하치와레","모몽가","쿠리만쥬","라코","우사기","ㅊㅇㅋㅇ"]
+    },
+    {
+      name: "짱구",
+      en: "crayon-shinchan",
+      tag: "전연령",
+      desc: "짱구는 못말려",
+      kw: ["짱구","액션가면","신짱","맹구","부리부리","유리","철수","훈이","흰둥이","신형만","짱아","떡잎","ㅉㄱ"]
+    },
+    {
+      name: "디즈니 · 픽사 · 지브리",
+      en: "disney-pixar-ghibli",
+      tag: "전연령",
+      desc: "미키마우스 · 겨울왕국 · 토토로 · 치히로",
+      kw: ["디즈니","픽사","미키","도날드덕","신데델라","인어공주","엘사","겨울왕국","라푼젤","스티치","푸","토이스토리","알라딘","뮬란","주토피아","모아나","올라프","심바","ㄷㅈㄴ","토토로","치히로","하울","가오나시","포뇨","모노노케"]
+    },
+    {
+      name: "포켓몬",
+      en: "pokemon",
+      tag: "전연령",
+      desc: "포켓몬스터 · 피카츄 · 이브이",
+      kw: ["피카츄","파이리","꼬부기","리자몽","이상해씨","개굴닌자","님피아","포켓몬스터","이브이","메타몽","레쿠쟈","뮤","뮤츠","잠만보","고라파덕","몬스터볼"]
+    },
+    {
+      name: "마블 · DC · 카툰",
+      en: "marvel-dc-cartoon",
+      tag: "남녀공용",
+      desc: "히어로 · 아메리칸 카툰",
+      kw: ["마블","DC","슈퍼맨","아이언맨","캡틴아메리카","데드풀","닥스","베놈","배트맨","스파이더맨","어벤져스","톰과제리","스폰지밥","루니툰","심슨","파워퍼프걸","어드벤처타임","토르","헐크","로키","블랙위도우","조커","할리퀸","뚱이","가오갤","그루트"]
+    },
+    {
+      name: "서브컬처 · 미소녀",
+      en: "subculture-bishojo",
+      tag: "남성향",
+      desc: "게임 · 호요버스 · 보컬로이드 · 피규어 의상 속성",
+      kw: ["니케","원신","블루아카","붕괴","아이마스","페이트","젤다","홀로라이브","우마무스메","니어오토마타","미쿠","하츠네미쿠","보컬로이드","리제로","렘","에밀리아","바니걸","수영복","웨딩","교복"]
+    },
+  ];
+
+  const PD_CATS = [
+    {
+      name: "쿠지",
+      en: "kuji",
+      tag: "판매방식",
+      desc: "이치방쿠지 · 제일복권 · 용자모집 · 라스트원",
+      kw: ["이치방쿠지","제일복권","제복","야생","용자","라원","라스트원","ABC","A상","B상","일뜯","장당","통용자","상위상","하위상","덥찬","더블찬스","아타리","타이토"]
+    },
+    {
+      name: "굿즈",
+      en: "goods",
+      tag: "상품유형",
+      desc: "평면 굿즈 · 입체 굿즈 · 캐릭터 상품",
+      kw: ["스티커","아크릴","씰","포스터","키링","마그넷","자석","뱃지","엽서","클리어카드","비주얼보드","쿠션","스탠드","캔뱃지","컵","타올","수건","인형"]
+    },
+    {
+      name: "가챠 · 랜덤",
+      en: "gacha-random",
+      tag: "판매방식",
+      desc: "캡슐 토이 · 가챠샵 · 랜덤박스 · 리멘트",
+      kw: ["가챠","랜덤박스","랜박","랜깡","리멘트","캡슐","가챠샵","뽑기"]
+    },
+  ];
+
+  const tagClass = {
+    "남성향": "male",
+    "여성향": "female",
+    "남녀공용": "mixed",
+    "전연령": "kids",
+    "혼합": "mixed",
+    "판매방식": "mixed",
+    "상품유형": "mixed",
+  };
+
+  function isJamo(s) {
+    return /^[\u3131-\u318E]+$/.test(s);
+  }
+
+  function kwHtml(kw) {
+    return kw.map(k =>
+      `<span class="kw${isJamo(k) ? ' jamo' : ''}">${k}</span>`
+    ).join('');
+  }
+
+  function subGroupHtml(sg) {
+    const tagCls = tagClass[sg.tag] || "mixed";
+    const enLabel = sg.en ? `<span class="en-label sm">${sg.en}</span>` : '';
+    return `
+      <div class="subcat">
+        <div class="subcat-head">
+          <span class="subcat-name">${sg.name}</span>
+          ${enLabel}
+          <span class="tag ${tagCls}">${sg.tag}</span>
+          <span class="card-desc" style="margin-top:0">${sg.desc}</span>
+          <span class="subcat-meta">${sg.kw.length}개</span>
+        </div>
+        <div class="kw-list">${kwHtml(sg.kw)}</div>
+      </div>
+    `;
+  }
+
+  function renderCard(c) {
+    const tagCls = tagClass[c.tag] || "mixed";
+    const totalKw = c.subGroups
+      ? c.subGroups.reduce((s, g) => s + g.kw.length, 0)
+      : c.kw.length;
+    const enLabel = c.en ? `<span class="en-label">${c.en}</span>` : '';
+
+    const bodyHtml = c.subGroups
+      ? c.subGroups.map(subGroupHtml).join('')
+      : `<div class="card-body"><div class="kw-list">${kwHtml(c.kw)}</div></div>`;
+
+    return `
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-name">
+              ${c.name}
+              ${enLabel}
+              <span class="tag ${tagCls}">${c.tag}</span>
+            </div>
+            <div class="card-desc">${c.desc}</div>
+          </div>
+          <div class="card-meta">${totalKw}개 키워드${c.subGroups ? ` · ${c.subGroups.length}개 하위 그룹` : ''}</div>
+        </div>
+        ${bodyHtml}
+      </div>
+    `;
+  }
+
+  // 성별 타겟 영문 매핑
+  const TAG_EN = {
+    "남성향": "male-oriented",
+    "여성향": "female-oriented",
+    "남녀공용": "unisex",
+    "전연령": "all-ages",
+    "혼합": "mixed",
+    "판매방식": "sales-format",
+    "상품유형": "product-type",
+  };
+
+  document.getElementById('ipgrid').innerHTML = IP_CATS.map(renderCard).join('');
+  document.getElementById('pdgrid').innerHTML = PD_CATS.map(renderCard).join('');
+
+  // 자동화 라벨 매핑 테이블
+  function labelMapRow(c, isSub) {
+    const cls = isSub ? 'sub' : '';
+    const tagEn = TAG_EN[c.tag] || 'mixed';
+    return `<tr class="${cls}">
+      <td class="ko">${isSub ? '└ ' : ''}${c.name}</td>
+      <td class="en">${c.en || '—'}</td>
+      <td>${c.tag}</td>
+      <td class="en">${tagEn}</td>
+    </tr>`;
+  }
+
+  const mapRows = [];
+  mapRows.push(`<tr><td colspan="4" style="background:var(--soft-2); font-weight:700; color:var(--brand-dark); font-size:11px; letter-spacing:0.05em; padding:6px 10px;">IP 카테고리</td></tr>`);
+  IP_CATS.forEach(c => {
+    mapRows.push(labelMapRow(c, false));
+    if (c.subGroups) c.subGroups.forEach(sg => mapRows.push(labelMapRow(sg, true)));
+  });
+  mapRows.push(`<tr><td colspan="4" style="background:var(--soft-2); font-weight:700; color:var(--brand-dark); font-size:11px; letter-spacing:0.05em; padding:6px 10px;">상품 포맷 카테고리</td></tr>`);
+  PD_CATS.forEach(c => mapRows.push(labelMapRow(c, false)));
+  document.getElementById('labelmap-body').innerHTML = mapRows.join('');
+
+  // JSON 스니펫 생성
+  function buildLabelJson() {
+    const ip = {};
+    IP_CATS.forEach(c => {
+      if (c.subGroups) {
+        ip[c.en] = {
+          label: c.name,
+          target: TAG_EN[c.tag],
+          sub_groups: Object.fromEntries(c.subGroups.map(sg => [sg.en, {
+            label: sg.name, target: TAG_EN[sg.tag]
+          }]))
+        };
+      } else {
+        ip[c.en] = { label: c.name, target: TAG_EN[c.tag] };
+      }
+    });
+    const pd = {};
+    PD_CATS.forEach(c => { pd[c.en] = { label: c.name, target: TAG_EN[c.tag] }; });
+    return { ip_categories: ip, product_formats: pd };
+  }
+
+  const jsonObj = buildLabelJson();
+  const jsonText = JSON.stringify(jsonObj, null, 2);
+  // Syntax highlight
+  const highlighted = jsonText
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"([^"]+)":/g, '<span class="k">"$1"</span>:')
+    .replace(/: "([^"]*)"/g, ': <span class="s">"$1"</span>');
+  document.getElementById('jsonblock').innerHTML = highlighted;
+
+  window.copyJson = function() {
+    navigator.clipboard.writeText(jsonText).then(() => {
+      const btn = event.target;
+      const orig = btn.textContent;
+      btn.textContent = '복사됨 ✓';
+      setTimeout(() => btn.textContent = orig, 1500);
+    });
+  };
+
+  const ipkw = IP_CATS.reduce((s, c) =>
+    s + (c.subGroups ? c.subGroups.reduce((a, g) => a + g.kw.length, 0) : c.kw.length),
+  0);
+  const pdkw = PD_CATS.reduce((s, c) => s + c.kw.length, 0);
+  document.getElementById('ipcnt').textContent = IP_CATS.length;
+  document.getElementById('ipkw').textContent = ipkw;
+  document.getElementById('pdcnt').textContent = PD_CATS.length;
+  document.getElementById('pdkw').textContent = pdkw;
+</script>
+</body>
+</html>
